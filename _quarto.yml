@@ -8,9 +8,9 @@ execute:
 book:
   title: "YOUR PROJECT TITLE"
   author:
-    - AUTHOR1 (UNI1)
-    - AUTHOR2 (UNI2)
-  repo-url: https://github.com/YOUR_GITHUB_ACCOUNT/REPO_NAME
+    - Luis Gomez Ordonez (lg3441)
+    - Maria Gonzalez Llama
+  repo-url: https://github.com/luisgomezordoniez/football-soccer
   date: today
   page-footer:
     right: |
@@ -24,7 +24,7 @@ book:
 
 format:
   html:
-    theme: cosmo
+    theme: superhero
     code-fold: true
 
 
