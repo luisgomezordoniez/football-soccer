@@ -6,10 +6,10 @@ execute:
   echo: true
 
 book:
-  title: "YOUR PROJECT TITLE"
+  title: "The Beautiful Game"
   author:
     - Luis Gomez Ordonez (lg3441)
-    - Maria Gonzalez Llama
+    - Maria Gonzalez Llama (mgg2173)
   repo-url: https://github.com/luisgomezordoniez/football-soccer
   date: today
   page-footer:
@@ -24,7 +24,7 @@ book:
 
 format:
   html:
-    theme: superhero
+    theme: yeti
     code-fold: true
 
 

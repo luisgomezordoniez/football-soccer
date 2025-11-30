@@ -1,5 +1,123 @@
 # Data
 
+We gather our data from the website "https://www.football-data.co.uk/", the website have data from matches across the main leagues in Europe and America. We will focus our analysys in the leagues of England, since we have data for the top 4 tiers.
+
 ## Description
 
+To do: Explain the dataset, maybe talk about the variables (?)
+
+Key to results data:
+
+Div = League Division
+Date = Match Date (dd/mm/yy)
+Time = Time of match kick off
+HomeTeam = Home Team
+AwayTeam = Away Team
+FTHG and HG = Full Time Home Team Goals
+FTAG and AG = Full Time Away Team Goals
+FTR and Res = Full Time Result (H=Home Win, D=Draw, A=Away Win)
+HTHG = Half Time Home Team Goals
+HTAG = Half Time Away Team Goals
+HTR = Half Time Result (H=Home Win, D=Draw, A=Away Win)
+
+Match Statistics (where available)
+Attendance = Crowd Attendance
+Referee = Match Referee
+HS = Home Team Shots
+AS = Away Team Shots
+HST = Home Team Shots on Target
+AST = Away Team Shots on Target
+HHW = Home Team Hit Woodwork
+AHW = Away Team Hit Woodwork
+HC = Home Team Corners
+AC = Away Team Corners
+HF = Home Team Fouls Committed
+AF = Away Team Fouls Committed
+HFKC = Home Team Free Kicks Conceded
+AFKC = Away Team Free Kicks Conceded
+HO = Home Team Offsides
+AO = Away Team Offsides
+HY = Home Team Yellow Cards
+AY = Away Team Yellow Cards
+HR = Home Team Red Cards
+AR = Away Team Red Cards
+
+```{r}
+
+library(dplyr)
+library(tidyr)
+library(readr)
+library(dplyr)
+library(forcats)
+library(ggplot2)
+
+Data_England <- read_csv("https://github.com/luisgomezordoniez/football-soccer/raw/refs/heads/main/Data_England.csv")
+
+#summary(Data_England)
+
+Data_England$League <- factor(Data_England$League, levels =c("Premier League", "Championship","League One", "League Two"), ordered = TRUE)
+```
+
+
 ## Missing value analysis
+```{r}
+
+
+missing_summary <- Data_England %>%
+  group_by(League, Season) %>%
+  summarise(across(everything(), ~100* mean(is.na(.))), .groups = "drop") %>%  # proportion missing
+  pivot_longer(
+    cols = -c(League, Season),
+    names_to = "variable",
+    values_to = "prop_missing"
+  ) %>%
+  group_by(variable) %>%
+  mutate(total_missing = mean(prop_missing, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(variable = fct_reorder(variable, total_missing, .desc = TRUE))
+
+missing_summary=missing_summary |>
+  mutate(Season=substr(Season, 6,10))
+
+ggplot(missing_summary, aes(x = variable, y = Season, fill = prop_missing)) +
+  geom_tile(color = "white") +
+  facet_wrap(~ League, scales = "free_y") +
+  scale_fill_continuous(palette = c("white","#FEE0D2", "#FC9272"))+
+  labs(
+    title = "Proportion of Missing Values Across Seasons and Columns by League",
+    x = "Variable",
+    y = "Season",
+    fill="Missing (%)"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+    panel.spacing = unit(1, "lines")
+  )
+
+
+
+```
+
+```{r}
+
+library(ggplot2)
+library(patchwork)
+
+# Boxplots for FTHG and FTAG
+p1 <- ggplot(Data_England, aes(y = FTHG)) +
+  geom_boxplot(fill = "lightblue", alpha = 0.7, outlier.color = "red", outlier.size = 2) +
+  labs(title = "Home Goals (FTHG) - Boxplot", y = "Goals") +
+  theme_minimal()
+
+p2 <- ggplot(Data_England, aes(y = FTAG)) +
+  geom_boxplot(fill = "lightgreen", alpha = 0.7, outlier.color = "red", outlier.size = 2) +
+  labs(title = "Away Goals (FTAG) - Boxplot", y = "Goals") +
+  theme_minimal()
+
+p1 + p2
+
+
+```
+To Do: Explain a bit what we see, maybe we can add another step of explaining our raw data.
+

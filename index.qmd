@@ -1,1 +1,4 @@
 # Introduction
+
+We are interested in analyzing football soccer match results and statistics from several major leagues around the world.
+Soccer is one of the most popular sports globally, and its relevance is growing as the next World Cup approaches. We aim to explore how common match statistics such as goals, shots on target, and fouls, affect not only the outcome of individual games but also overall team performance throughout a season. We also plan to study how team rankings evolve over time, whether different strategic patterns can be identified, and how accurate betting odds are in predicting results. Through this project, we hope to discover additional insights about the game and share interesting findings.
