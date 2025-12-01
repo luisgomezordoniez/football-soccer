@@ -1,11 +1,8 @@
-#  Enlglish football through the years
-
+# Enlglish football through the years
 
 We want to see how soccer has changed through the years in terms of attack and defense. Our hypothesis is that the english football has become more competitive. For proving this hypothesis we will analyze the differences among the teams that conform the Premier League, the dominance and the results of the matches.
 
 First of all, we know that goals can be a strong indicator to understand this, so we plan to base our first analysis on the average number of goals scored by teams.
-
-aasas
 
 ```{r,warning=FALSE,message=FALSE}
 library(dplyr)
@@ -23,6 +20,35 @@ library(dplyr)
 library(ggrepel)
 library(readr)
 library(forcats)
+library(FactoMineR)
+library(factoextra)
+library(ggplot2)
+library(dplyr)
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(ggalluvial)
+library(lubridate)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(ggalluvial)
+library(dplyr)
+library(GGally)
+library(ggplot2)
+library(dplyr)
+library(scales)   # para rescale()
+library(GGally)
+library(ggplot2)
+library(vcd)
+
 
 Data_England <- read_csv("https://github.com/luisgomezordoniez/football-soccer/raw/refs/heads/main/Data_England.csv")
 
@@ -144,9 +170,7 @@ While the average number of goals by home teams has remained relatively stable s
 ```{r}
 
 
-library(dplyr)
-library(tidyr)
-library(ggplot2)
+
 
 data_cleveland <- premier_goals_yearly |>
   pivot_longer(
@@ -185,7 +209,6 @@ ggplot(data_cleveland, aes(x = value, y = factor(Year))) +
 
 
 ```
-
 
 i\. Away goals\
 Between 1993 and 2010, away teams scored about 1.10-1.15 goals per match, but since 2011 this number has increased to around 1.20-1.25. Starting in 2018, we can observe a sustained raise in away goals, reaching historic highs in 2023 and 2024, when they exceeded 1.45 goals per match.
@@ -238,9 +261,9 @@ results_yearly |>
 
 Over the past three decades, Premier League results show a decrease in draws, an increase in away-team victories, and relatively stable home-team victories. This suggests that the league has become more competitive and that the traditional home-field advantage has gradually diminished.
 
-## Location of Teams
+# Location of Teams
 
-We have 116 teams across all the tiers, we can see that London and 
+We have 116 teams across all the tiers, we can see that London and
 
 ```{r}
 {
@@ -381,9 +404,7 @@ ggplot() +
 
 To Do: Add number of teams per region. (?)
 
-
-## 4. Team performance by league over the years
-
+# Team performance by league over the years
 
 ```{r}
 calculate_points <- function(full_time_result, is_home_team) {
@@ -506,11 +527,7 @@ A typical league is very competitive, besides fighting for be champion, teams al
 
 ```{r}
 # Alluvial of the standigns of each league over the last years.
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(ggalluvial)
-library(lubridate)
+
 
 target_season <- "2023/2024"
 
@@ -640,10 +657,7 @@ ggplot(
 ```{r}
 
 # Teams in the last season, where were they in the last seasons?
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(ggalluvial)
+
 
 ## Definition of standings_final
 season_sizes <- premier_full |>
@@ -749,7 +763,7 @@ ggplot(
     axis.text.y = element_blank()
   )
 ```
-
+is this graph repeated?
 ```{r}
 # Teams in the season 2000/2001: where are they in the current season?
 # Equipos que aparecen en 2000/2001
@@ -809,14 +823,12 @@ ggplot(
   )
 ```
 
-## 5. Relation among numeric variables
+# Relation among numeric variables
 
 We would like to conduct and analysis to examine the relationships among the different numeric variables in the dataset, for example: the number of goals, (home/away), shots, corners, offsides, total card points (yellow + red), win odds, and draw odds.
 
 ```{r}
-library(dplyr)
-library(GGally)
-library(ggplot2)
+
 
 #premier_full_complete |>
 #  group_by(Season) |>
@@ -907,10 +919,7 @@ ggparcoord(
 ```
 
 ```{r}
-library(dplyr)
-library(scales)   # para rescale()
-library(GGally)
-library(ggplot2)
+
 
 # 1. Temporadas que queremos comparar
 seasons_focus <- c("2000/2001", "2009/2010", "2023/2024")
@@ -959,26 +968,487 @@ GGally::ggparcoord(
 
 ```
 
-## 6. Relation among categorical variables
+# Relation among categorical variables
 
 We want to analyze the existing categorical data and create additional categorical variables to better understand the relationships between team results and certain classifications. We would also like to explore the behavior of different teams, for example, how many home teams that were losing a match ended up winning it, or which leagues are more "home-biased" (meaning that home teams win most of the matches).
 
+To do. Clean up a bit
+
 ```{r}
-# Mosaic plot of different categories.
+Data_England_Time=Data_England |>
+  filter(is.na(Time)==F)
+# Convert Time to proper time format
+
+Data_England_Time$Time <- as.POSIXct(Data_England_Time$Time, format = "%H:%M:%S")
+
+# Extract hour for grouping
+Data_England_Time$Hour <- as.numeric(format(Data_England_Time$Time, "%H"))
+Data_England_Time$Minute <- as.numeric(format(Data_England_Time$Time, "%M"))
+# Convert Date to proper format and extract day of week
+Data_England_Time$Date <- as.Date(Data_England_Time$Date)
+Data_England_Time$DayOfWeek <- weekdays(Data_England_Time$Date)
+Data_England_Time$IsWeekend <- Data_England_Time$DayOfWeek %in% c("Saturday", "Sunday")
+
+
+
+
+# Extract hour from Time column
+Data_England$Hour <- as.numeric(format(as.POSIXct(Data_England$Time, format = "%H:%M:%S"), "%H"))
+
+sort(unique(Data_England_Time$Hour))
+
+# Basic histogram
+ggplot(Data_England_Time, aes(x = Hour)) +
+  geom_bar() +
+  labs(
+    title = "Distribution of Match Starting Times",
+    subtitle = "Histogram of kick-off hours",
+    x = "Starting Hour",
+    y = "Number of Matches"
+  ) +
+  theme_minimal()
+
+
+# Create time categories
+Data_England_Time$Time_Category <- cut(Data_England_Time$Hour,
+                              breaks = c(0, 14, 18, 21),
+                              labels = c("Morning", "Afternoon", "Evening"),
+                              include.lowest = TRUE)
+
+# Analyze match outcomes by time of day
+time_analysis <- Data_England_Time %>%
+  group_by(Time_Category) %>%
+  summarise(
+    Total_Matches = n(),
+    Home_Wins = sum(FTR == "H", na.rm = TRUE),
+    Away_Wins = sum(FTR == "A", na.rm = TRUE),
+    Draws = sum(FTR == "D", na.rm = TRUE)
+  )
+
+# Goals scored by time of day
+goals_by_time <- Data_England_Time %>%
+  group_by(Hour) %>%
+  summarise(
+    Avg_Home_Goals = mean(FTHG, na.rm = TRUE),
+    Avg_Away_Goals = mean(FTAG, na.rm = TRUE),
+    Total_Goals=mean(FTHG+FTAG,na.rm=TRUE),
+    Matches = n()
+  )
+
+# Discipline by time
+cards_by_time <- Data_England_Time %>%
+  group_by(Hour) %>%
+  summarise(
+    Avg_Yellow_Cards = mean(HY + AY, na.rm = TRUE),
+    Avg_Red_Cards = mean(HR + AR, na.rm = TRUE)
+  )
+
+
+
+# Combine with time analysis
+weekend_time_analysis <- Data_England_Time %>%
+  group_by(IsWeekend, Time_Category) %>%
+  summarise(
+    Matches = n(),
+    Avg_Goals = mean(FTHG + FTAG, na.rm = TRUE),
+    Home_Win_Rate = mean(FTR == "H", na.rm = TRUE)
+  )
+
+
+# Home team performance by kick-off time
+home_team_time <- Data_England_Time %>%
+  group_by(HomeTeam, Time_Category) %>%
+  summarise(
+    Matches = n(),
+    Wins = sum(FTR == "H"),
+    Goals_Scored = mean(FTHG),
+    Goals_Conceded = mean(FTAG),
+    Win_Rate = mean(FTR == "H")
+  ) %>%
+  arrange(desc(Win_Rate))
+
+# Away team performance by kick-off time
+away_team_time <- Data_England_Time %>%
+  group_by(AwayTeam, Time_Category) %>%
+  summarise(
+    Matches = n(),
+    Wins = sum(FTR == "A"),
+    Goals_Scored = mean(FTAG),
+    Goals_Conceded = mean(FTHG),
+    Win_Rate = mean(FTR == "A")
+  )
+
+
+# Goals by hour of day
+ggplot(goals_by_time, aes(x = Hour, y = Total_Goals)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Average Goals by Kick-off Time", 
+       x = "Hour of Day", y = "Average Goals per Match")
+
+# Match outcomes by time category
+ggplot(time_analysis, aes(x = Time_Category, y = Home_Wins/Total_Matches)) +
+  geom_col() +
+  labs(title = "Home Win Rate by Time of Day", 
+       x = "Time Category", y = "Home Win Rate")
+
+
+# Create goal difference categories
+Data_England_Time$Goal_Diff <- Data_England_Time$FTHG - Data_England_Time$FTAG
+Data_England_Time$Result_Type <- ifelse(Data_England_Time$Goal_Diff > 2, "Big Home Win",
+                               ifelse(Data_England_Time$Goal_Diff > 0, "Close Home Win",
+                                      ifelse(Data_England_Time$Goal_Diff == 0, "Draw",
+                                             ifelse(Data_England_Time$Goal_Diff < -2, "Big Away Win", "Close Away Win"))))
+
+mosaicplot(~ Time_Category + Result_Type, data = Data_England_Time,
+           main = "Match Types by Time of Day",
+           xlab = "Time Category", 
+           ylab = "Result Type",
+           color = c("darkred", "red", "gray", "blue", "darkblue"))
+
+
+# For more complex relationships (using vcd package)
+# Extract day of week
+Data_England_Time$DayOfWeek <- weekdays(as.Date(Data_England_Time$Date))
+Data_England_Time$DayType <- ifelse(Data_England_Time$DayOfWeek %in% c("Saturday", "Sunday"), 
+                           "Weekend", "Weekday")
+
+mosaicplot(~ Time_Category + DayType, data = Data_England_Time,
+           main = "Match Results: Weekend vs Weekday",
+           xlab = "Day Type", 
+           ylab = "Full Time Result",
+           color = c("#FF6B6B", "#4ECDC4", "#45B7D1"))
+
+
+
+# Result by Time and Day Type
+structable(FTR ~ Time_Category + DayType+Div, data = Data_England_Time)
+mosaic(~ Time_Category + DayType +Div+ FTR, data = Data_England_Time,
+       main = "Results by Time and Day Type",
+       labeling_args = list(rot_labels = c(20, 0, 0, 0)),
+       highlighting = "FTR",
+       highlighting_fill = c("red", "gray", "blue"))
+
+
+# Simple binary/categorical versions of your variables
+# Similar to the (No/Yes) format in your image
+
+# Create binary variables from your data
+Data_England_Time$High_Goals <- ifelse(Data_England_Time$FTHG + Data_England_Time$FTAG > 2.5, "Yes", "No")
+Data_England_Time$Home_Advantage <- ifelse(Data_England_Time$FTHG > Data_England_Time$FTAG, "Yes", "No")
+Data_England_Time$Many_Cards <- ifelse(Data_England_Time$HY + Data_England_Time$AY > 3.5, "Yes", "No")
+Data_England_Time$Many_Shots <- ifelse(Data_England_Time$HS + Data_England_Time$AS > 25, "Yes", "No")
+Data_England_Time$Weekend <- ifelse(weekdays(as.Date(Data_England_Time$Date)) %in% c("Saturday", "Sunday"), "Yes", "No")
+
+
+# Simple 2x2 mosaic plot
+mosaicplot(~ Home_Advantage + Weekend, data = Data_England_Time,
+           main = "Home Wins vs Weekend Matches",
+           xlab = "Home Win", 
+           ylab = "Weekend Match",
+           color = c("lightblue", "salmon"))
+
+# Create a structured plot similar to your image
+par(mfrow = c(2, 2))  # 2x2 grid of plots
+
+# Plot 1: Goals vs Weekend
+mosaicplot(~ High_Goals + Weekend, data = Data_England_Time,
+           main = "High Scoring vs Weekend",
+           color = c("#E7B800", "#2E9FDF"))
+
+# Plot 2: Cards vs Home Advantage
+mosaicplot(~ Many_Cards + Home_Advantage, data = Data_England_Time,
+           main = "Many Cards vs Home Wins",
+           color = c("#E7B800", "#2E9FDF"))
+
+# Plot 3: Shots vs Home Advantage
+mosaicplot(~ Many_Shots + Home_Advantage, data = Data_England_Time,
+           main = "Many Shots vs Home Wins",
+           color = c("#E7B800", "#2E9FDF"))
+
+# Plot 4: Goals vs Many Cards
+mosaicplot(~ High_Goals + Many_Cards, data = Data_England_Time,
+           main = "High Scoring vs Many Cards",
+           color = c("#E7B800", "#2E9FDF"))
+
+par(mfrow = c(1, 1))  # Reset plot layout
+
+
+# Convert time to binary categories
+Data_England_Time$Prime_Time <- ifelse(Data_England_Time$Hour %in% c(17, 18, 19, 20), "Yes", "No")
+Data_England_Time$Afternoon <- ifelse(Data_England_Time$Hour %in% c(12, 13, 14, 15), "Yes", "No")
+
+# Create mosaic plots with time variables
+mosaicplot(~ Home_Advantage + Prime_Time, data = Data_England_Time,
+           main = "Home Wins vs Prime Time Matches",
+           xlab = "Home Win", 
+           ylab = "Prime Time (5-8 PM)",
+           color = c("lightgreen", "orange"))
+
+mosaicplot(~ High_Goals + Afternoon, data = Data_England_Time,
+           main = "High Scoring vs Afternoon Matches",
+           xlab = "High Goals (>2.5)", 
+           ylab = "Afternoon Match",
+           color = c("lightblue", "pink"))
+
+
+
+# More polished version similar to academic papers
+mosaic(~Prime_Time+Home_Advantage + Weekend + Many_Cards, 
+       data = Data_England_Time,
+       main = "Football Match Analysis",
+       labeling_args = list(
+         set_varnames = c(Home_Advantage = "Home Win", 
+                          Weekend = "Weekend Match", 
+                          Many_Cards = "High Cards"),
+         rot_labels = c(20, 0, 0, 0)
+       ),
+       highlighting = "Home_Advantage",
+       highlighting_fill = c("lightblue", "coral"))
+
+###
 ```
 
-## 7. Detection of clusters
+# Detection of clusters
 
 We know that many of the numerical variables in our dataset are related, so within each league we would like to identify clusters of teams that share similar behavior across seasons. Based on these clusters, we could create indexes and provide explanations for the patterns observed.
 
 ```{r}
-# Byplot of numerical variables.
+# Create team-level aggregated data
+most_recent_season <- max(Data_England$Season, na.rm = TRUE)
+
+current_tier1_teams <- Data_England %>%
+  filter(Div == "E0" & Season ==most_recent_season ) %>%
+  distinct(HomeTeam) %>%
+  pull(HomeTeam)
+
+
+team_performance <- Data_England |>
+  # Home performances
+  select(Season, Team = HomeTeam, 
+         Goals_For = FTHG, Goals_Against = FTAG,
+         Shots = HS, Shots_Target = HST,
+         Fouls = HF, Corners = HC,
+         Yellow_Cards = HY, Red_Cards = HR,
+         Result = FTR) |>
+  mutate(Venue = "Home") |>
+  # Away performances
+  bind_rows(
+    Data_England |>
+      filter(Div == "E0") |>
+      select(Season, Team = AwayTeam,
+             Goals_For = FTAG, Goals_Against = FTHG,
+             Shots = AS, Shots_Target = AST,
+             Fouls = AF, Corners = AC,
+             Yellow_Cards = AY, Red_Cards = AR,
+             Result = FTR) |>
+      mutate(Venue = "Away")
+  ) |>
+  group_by(Team) |>
+  summarise(
+    # Goal metrics
+    Avg_Goals_For = mean(Goals_For, na.rm = TRUE),
+    Avg_Goals_Against = mean(Goals_Against, na.rm = TRUE),
+    Goal_Difference = mean(Goals_For - Goals_Against, na.rm = TRUE),
+    
+    # Shooting metrics
+    Avg_Shots = mean(Shots, na.rm = TRUE),
+    Avg_Shots_Target = mean(Shots_Target, na.rm = TRUE),
+    Shot_Accuracy = ifelse(mean(Shots, na.rm = TRUE) > 0,
+                           mean(Shots_Target, na.rm = TRUE) / mean(Shots, na.rm = TRUE),
+                           0),
+    
+    # Defensive metrics
+    Avg_Fouls = mean(Fouls, na.rm = TRUE),
+    Avg_Corners = mean(Corners, na.rm = TRUE),
+    
+    # Discipline metrics
+    Avg_Yellow_Cards = mean(Yellow_Cards, na.rm = TRUE),
+    Avg_Red_Cards = mean(Red_Cards, na.rm = TRUE),
+    
+    # WIN COUNTS - NEW ADDITIONS
+    Home_Wins = sum(Venue == "Home" & Result == "H", na.rm = TRUE),
+    Away_Wins = sum(Venue == "Away" & Result == "A", na.rm = TRUE),
+    Total_Wins = sum((Venue == "Home" & Result == "H") | (Venue == "Away" & Result == "A"), na.rm = TRUE),
+    
+    # Performance metrics
+    Win_Rate = Total_Wins / n(),
+    Draw_Rate = sum(Result == "D", na.rm = TRUE) / n(),
+    Loss_Rate = sum((Venue == "Home" & Result == "A") | (Venue == "Away" & Result == "H"), na.rm = TRUE) / n(),
+    
+    # Home/Away specific rates
+    Home_Win_Rate = Home_Wins / sum(Venue == "Home"),
+    Away_Win_Rate = Away_Wins / sum(Venue == "Away"),
+    
+    # Venue metrics
+    Home_Matches = sum(Venue == "Home"),
+    Away_Matches = sum(Venue == "Away"),
+    
+    # Sample size
+    Matches_Played = n(),
+    
+    .groups = 'drop'
+  ) |>
+  filter(Matches_Played >= 50)  # Only teams with sufficient data  # Only teams with sufficient data
+
+
+team_performance=team_performance |>
+  filter(Team %in% current_tier1_teams) 
+# Select numeric variables for PCA
+
+team_performance <- team_performance %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.nan(.), 0, .)))
+
+team_performance <- team_performance %>%
+  mutate_if(is.numeric, ~ifelse(is.infinite(.), 0, .))
+
+
+pca_data <- team_performance |>
+  select(Avg_Goals_For, Avg_Goals_Against,
+         Avg_Shots, Avg_Shots_Target,
+         Avg_Fouls, Avg_Corners, Avg_Yellow_Cards, Avg_Red_Cards,
+         Draw_Rate,Home_Win_Rate,Away_Win_Rate) |>
+  scale()  # Standardize the variables
+
+rownames(pca_data) <- team_performance$Team
+
+
+# Perform PCA
+pca_result <- PCA(pca_data, graph = FALSE)
+
+# Basic biplot
+fviz_pca_biplot(pca_result, 
+                repel = TRUE,
+                col.var = "red",
+                col.ind = "blue",
+                alpha.ind = 0.7,
+                title = "Team Performance Biplot - All Variables")
+
+
+
+
+
 ```
 
-## 8. Other analysis and graphs
+To Do: Explain PCA
+
+# Referee analysys, is there bias?
 
 We would like to explore different ways of analyzing referees behavior during matches to determine whether referees are biased toward home teams. We also want to examine if there is any relationship between league results and World Cup outcomes. In addition, we plan to calculate the differences between the probabilities provided by betting houses and the actual outcomes, as well as conduct other complementary analyses.
 
+To Do: Decide which one to get
+
 ```{r}
-# Different plots.
+Referees=Data_England |>
+  filter(is.na(Referee)==F )|>
+  mutate(HomeWon=ifelse(FTR=="H",1,0),
+         AwayWon=ifelse(FTR=="A",1,0))|>
+  group_by(
+    Referee
+  ) |>
+  summarise(Count_matches=n(),
+            n_seasons=n_distinct(Season,na.rm=T),
+            n_tiers=n_distinct(Tier,na.rm=T),
+            Home_wins_count=sum(HomeWon,na.rm=T),
+            Away_wins_count=sum(AwayWon,na.rm=T))
+
+Referees=Referees |>
+  filter(Count_matches>=15)
+
+
+
+Referees %>%
+  arrange(desc(Count_matches)) %>%
+  slice_head(n = 30) %>%                 # top 30
+  mutate(Referee = fct_reorder(Referee, Count_matches)) %>%
+  ggplot(aes(x = Referee, y = Count_matches)) +
+  geom_segment(aes(xend = Referee, yend = 0), color = "grey70") +
+  geom_point(size = 3, color = "darkgreen") +
+  coord_flip() +
+  labs(
+    title = "Top Referees by Match Count",
+    x = "Referee",
+    y = "Matches"
+  ) +
+  theme_minimal()
+
+Referees %>%
+  mutate(
+    home_win_rate = Home_wins_count / Count_matches,
+    away_win_rate = Away_wins_count / Count_matches
+  ) %>%
+  ggplot(aes(x = home_win_rate, y = away_win_rate, fill = Count_matches)) +
+  geom_point(alpha = 0.7, color = "steelblue") +
+  
+  labs(
+    title = "Home vs Away Win Rates per Referee",
+    x = "Home Win Rate",
+    y = "Away Win Rate",
+    size = "Matches Refereed"
+  ) +
+  theme_minimal()
+
+
+Referees %>%
+  mutate(
+    home_win_rate = Home_wins_count / Count_matches
+  ) %>%
+  ggplot(aes(x = Count_matches, y = home_win_rate)) +
+  geom_point(alpha = 0.3, color = "darkblue") +
+  scale_y_log10()+
+  scale_x_log10()+
+  labs(
+    title = "Do More Experienced Referees Show Less Home Bias?",
+    x = "Matches ",
+    y = "Home Win Rate"
+  ) +
+  theme_minimal()
+
+
+Referees_Home_team=Data_England |>
+  filter(is.na(Referee)==F)|>
+  mutate(HomeWon=ifelse(FTR=="H",1,0),
+         AwayWon=ifelse(FTR=="A",1,0))|>
+  group_by(
+    Referee, HomeTeam
+  ) |>
+  summarise(Count_matches=n(),
+            n_seasons=n_distinct(Season,na.rm=T),
+            n_tiers=n_distinct(Tier,na.rm=T),
+            Home_wins_count=sum(HomeWon,na.rm=T),
+            Away_wins_count=sum(AwayWon,na.rm=T))
+
+
+
+Referees_Home_team <- Referees_Home_team |>
+  mutate(
+    Home_win_rate = Home_wins_count / Count_matches,
+    Total_matches = Count_matches
+  )
+
+# Filter for meaningful combinations (enough matches)
+significant_ref_team <- Referees_Home_team |>
+  filter(Total_matches >= 20)  # Only consider referee-team pairs with 5+ matches
+
+# Heatmap
+ggplot(significant_ref_team, aes(x = Referee, y = HomeTeam)) +
+  geom_tile(aes(fill = Home_win_rate), color = "white") +
+  scale_fill_gradient2(
+    low = "blue", mid = "white", high = "red", 
+    midpoint = 0.5,  # Average home win rate
+    limits = c(0, 1),
+    name = "Home Win Rate"
+  ) +
+  labs(
+    title = "Referee Home Team Win Rates",
+    subtitle = "Heatmap showing if referees favor certain home teams",
+    x = "Referee",
+    y = "Home Team"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+    axis.text.y = element_text(size = 7),
+    legend.position = "bottom"
+  )
 ```
