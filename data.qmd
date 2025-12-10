@@ -1,9 +1,247 @@
 # Data
 
-We gather our data from the website "https://www.football-data.co.uk/", the website have data from matches across the main leagues in Europe and America. We will focus our analysys in the leagues of England, since we have data for the top 4 tiers.
+This project uses publicly available match-level data provided by Football-Data.co.uk, a long-standing repository of standardized football results and match statistics. The platform compiles official match information from multiple reputable sources—including XScores, BBC Sport, Flashscore, and ESPN—and distributes them in a consistent, computer-ready CSV format suitable for statistical analysis.
 
 ## Description
 
+
+For the purposes of this study, only data from English football competitions were used. These include the Premier League, Championship, League One, League Two, and, when available, the National League. The dataset covers more than two decades of competitive play, with full-time and half-time results available back to the 1993/94 season and detailed match statistics widely available from the 2000/01 season onward.
+
+The variables utilized in this project relate exclusively to match outcomes and in-game performance metrics. These include goals scored, half-time results, shots, shots on target, corners, fouls, offsides, disciplinary actions, and referee information. Historical bookmaker odds—also included in the original files—were intentionally excluded, as the analysis focuses on sporting performance rather than betting markets.
+
+Football-Data.co.uk aggregates information from multiple official and media-based match reporting services to ensure accuracy and completeness. Data are updated on a rolling basis throughout each season and are archived annually, enabling consistent longitudinal analysis across leagues and time periods.
+
+This dataset provides a comprehensive, standardized foundation for evaluating long-term trends in English football, comparing performance across divisions, and studying changes in the nature of the game over time.
+
+
+## Data Collection
+
+We automated the collection and cleaning of match-level data from the Football-Data.co.uk archive. Using tools from the purrr package, it downloads each available season across the four major English divisions, standardizes column naming conventions across years, removes unused or unavailable variables, and consolidates all leagues into a single harmonized dataset. This approach ensures reproducibility, minimizes manual intervention, and guarantees consistency across more than two decades of historical football data.
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(readr)
+library(dplyr)
+library(forcats)
+library(ggplot2)
+library(redav)
+
+not_all_na <- function(x) any(!is.na(x))
+year_end = 2025
+
+season_map <- function(start = 1993, end = year_end) {
+  season_year_s <- start:(end - 1)
+  season_year_e <- (start + 1):end
+  
+  tibble(
+    id_season = sprintf("%02d%02d", season_year_s %% 100, season_year_e %% 100),
+    season_name = paste0(season_year_s, "/", season_year_e)
+  )
+}
+
+query <- function(league, start = 1993, end = year_end) {
+  
+  temporadas <- season_map(start, end)
+  
+  keep_cols <- c(
+    "Div", "Date", "Time", "HomeTeam", "AwayTeam", "Home", "Away",
+    "FTHG", "FTAG", "FTR", "HTHG", "HTAG", "HTR", "Referee",
+    "HS", "AS", "HST", "AST", "HF", "AF", "HC", "AC",
+    "HY", "AY", "HR", "AR"
+  )
+  
+  dfs <- map2(
+    temporadas$id_season,
+    temporadas$season_name,
+    function(id, season) {
+      
+      url <- paste0("https://www.football-data.co.uk/mmz4281/", id, "/", league, ".csv")
+      
+      tryCatch({
+        
+        df <- read_csv(url, show_col_types = FALSE)
+        
+        df <- df %>% 
+          select(any_of(keep_cols)) %>% 
+          select_if(not_all_na)
+        
+        # fix old Home/Away formats
+        if ("Home" %in% names(df)) {
+          df <- df %>% rename(HomeTeam = Home, AwayTeam = Away)
+        }
+        
+        df <- df %>%
+          mutate(Season = season) %>%
+          mutate(across(everything(), as.character))
+        
+        message("Loaded season: ", season)
+        df
+        
+      }, error = function(e) {
+        message("No data for: ", season)
+        return(NULL)
+      })
+    }
+  )
+  
+  # bind all non-null elements
+  final <- bind_rows(dfs)
+  final=final |> filter(is.na(Div)==F)
+  message("Seasons loaded: ", length(unique(final$Season)))
+  message("Divisions found: ", paste(unique(final$Div), collapse = ", "))
+  
+  final
+}
+
+#We save a local copy to avoid unnecesary consults to the repository
+#E0 <- query("E0")   # Premier League | Tier 1
+#E1 <- query("E1")   # Championship | Tier 2
+#E2 <- query("E2")   # League One | Tier 3
+#E3 <- query("E3")   # League Two | Tier 4
+
+#Data_England=bind_rows(E0,E1,E2,E3)
+
+Data_England <- read_csv("https://github.com/luisgomezordoniez/football-soccer/raw/refs/heads/main/Data_England.csv")
+
+```
+
+## Mising Values and Outliers
+
+### Mising Values
+
+### Outliers
+
+
+
+
+```{r}
+outlier_analysis <- function(df, cols) {
+  results <- list()
+  
+  for (col in cols) {
+    if (!col %in% names(df)) {
+      message(paste("Column", col, "not found. Skipping."))
+      next
+    }
+    
+    x <- df[[col]]
+    x <- x[!is.na(x)]  # remove NAs
+    
+    # Summary stats
+    stats <- summary(x)
+    
+    # ---- Z-score method ----
+    zscores <- (x - mean(x)) / sd(x)
+    z_outliers <- x[abs(zscores) > 3]
+    
+    # ---- IQR method ----
+    Q1 <- quantile(x, 0.25)
+    Q3 <- quantile(x, 0.75)
+    IQR_val <- Q3 - Q1
+    lower_iqr <- Q1 - 1.5 * IQR_val
+    upper_iqr <- Q3 + 1.5 * IQR_val
+    iqr_outliers <- x[x < lower_iqr | x > upper_iqr]
+    
+    # ---- Percentile method ----
+    p1  <- quantile(x, 0.01)
+    p99 <- quantile(x, 0.99)
+    pct_outliers <- x[x < p1 | x > p99]
+    
+    results[[col]] <- list(
+      summary_stats = stats,
+      zscore_outliers = z_outliers,
+      z_outlier_pct = length(z_outliers) / length(x) * 100,
+      iqr_outliers = iqr_outliers,
+      iqr_outlier_pct = length(iqr_outliers) / length(x) * 100,
+      percentile_outliers = pct_outliers,
+      pct_outlier_pct = length(pct_outliers) / length(x) * 100
+    )
+  }
+  
+  return(results)
+}
+
+columns_to_check <- c(
+  "FTHG","FTAG",      # goals
+  "HS","AS",          # shots
+  "HST","AST",        # shots on target
+  "HF","AF",          # fouls
+  "HC","AC",          # corners
+  "HY","AY",          # yellow cards
+  "HR","AR"           # red cards
+)
+
+outliers <- outlier_analysis(Data_England, columns_to_check)
+
+
+outliers$FTHG$summary_stats
+outliers$FTHG$iqr_outliers
+outliers$FTHG$z_outlier_pct
+
+
+plot_outlier_boxplots <- function(df, cols) {
+  df %>%
+    select(all_of(cols)) %>%
+    pivot_longer(cols = everything(), names_to = "variable", values_to = "value") %>%
+    ggplot(aes(x = variable, y = value)) +
+    geom_boxplot(outlier.alpha = 0.5) +
+    theme_minimal(base_size = 13) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(
+      title = "Outlier Visualization (Boxplots)",
+      x = "",
+      y = "Value"
+    )
+}
+
+plot_outlier_boxplots(Data_England, columns_to_check)
+
+plot_density_outliers <- function(df, col) {
+  x <- df[[col]]
+  x <- x[!is.na(x)]
+  
+  p1  <- quantile(x, 0.01)
+  p99 <- quantile(x, 0.99)
+  
+  tibble(value = x) %>%
+    ggplot(aes(value)) +
+    geom_density(fill = "steelblue", alpha = 0.3) +
+    geom_vline(xintercept = p1,  color = "red", linetype = "dashed") +
+    geom_vline(xintercept = p99, color = "red", linetype = "dashed") +
+    theme_minimal(base_size = 13) +
+    labs(
+      title = paste("Density + Percentile Cutoffs:", col),
+      subtitle = "Red dashed lines = 1st & 99th percentiles",
+      x = col,
+      y = "Density"
+    )
+}
+
+plot_density_outliers(Data_England, "AR")
+plot_outlier_heatmap <- function(outlier_list) {
+  tibble(
+    variable = names(outlier_list),
+    zscore_pct   = sapply(outlier_list, function(x) x$z_outlier_pct),
+    iqr_pct      = sapply(outlier_list, function(x) x$iqr_outlier_pct),
+    percentile_pct = sapply(outlier_list, function(x) x$pct_outlier_pct)
+  ) %>%
+    pivot_longer(cols = -variable, names_to = "method", values_to = "pct") %>%
+    ggplot(aes(x = method, y = variable, fill = pct)) +
+    geom_tile() +
+    scale_fill_gradient(low = "white", high = "red") +
+    theme_minimal(base_size = 13) +
+    labs(
+      title = "Outlier Percentage by Method",
+      x = "Method",
+      y = "Variable",
+      fill = "% Outliers"
+    )
+}
+
+plot_outlier_heatmap(outliers)
+
+```
 To do: Explain the dataset, maybe talk about the variables (?)
 
 Key to results data:
@@ -45,12 +283,7 @@ Match Statistics (where available)
 
 ```{r}
 
-library(dplyr)
-library(tidyr)
-library(readr)
-library(dplyr)
-library(forcats)
-library(ggplot2)
+
 
 Data_England <- read_csv("https://github.com/luisgomezordoniez/football-soccer/raw/refs/heads/main/Data_England.csv")
 
@@ -62,7 +295,18 @@ Data_England$League <- factor(Data_England$League, levels =c("Premier League", "
 
 ## Missing value analysis
 ```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(tidyr)
+library(ggalluvial)
+library(lubridate)
+library(GGally)
+library(scales)   # para rescale()
+library(vcd)
 
+
+Data_England <- read_csv("https://github.com/luisgomezordoniez/football-soccer/raw/refs/heads/main/Data_England.csv")
 
 missing_summary <- Data_England %>%
   group_by(League, Season) %>%
@@ -97,6 +341,122 @@ ggplot(missing_summary, aes(x = variable, y = Season, fill = prop_missing)) +
   )
 
 
+plot_missing <- function(x, percent = TRUE, num_char = 100, 
+                         max_rows = NULL, max_cols = NULL) {	
+
+  na_count_all <- data.frame(is.na(x)) %>%	
+    dplyr::group_by_all() %>%	
+    dplyr::count(name = "count", sort = TRUE) %>%	
+    dplyr::ungroup() %>%	
+    tibble::rownames_to_column("pattern")	
+  
+  if (!is.null(max_rows)) na_count_all <- na_count_all %>% 
+      dplyr::filter(as.numeric(pattern) <= max_rows)
+  
+  na_count_all <- na_count_all %>% 
+    dplyr::mutate(pattern = factor(.data$pattern, levels = nrow(na_count_all):1))
+
+  
+  # count the number of columns with missing values; will be used later to determine if there's a "none missing" pattern	
+  na_count_all <- na_count_all %>% 	
+    dplyr::rowwise() %>%	
+    dplyr::mutate(num_missing_cols = sum(dplyr::c_across(where(is.logical))))	
+  
+  # data frame for missing patterns bar chart	
+  na_count_by_pattern <- na_count_all[,c("pattern", "count", "num_missing_cols")]
+  na_count_by_pattern$none_missing <- ifelse(na_count_by_pattern$num_missing_cols == 0, TRUE, FALSE)
+
+  # data frame for missing by column bar chart	
+  na_count_by_column <- data.frame(is.na(x)) %>%	
+    colSums() %>% 	
+    sort(decreasing = TRUE) %>% 	
+    tibble::enframe(name = "var", value = "count")	
+  
+  if (!is.null(max_cols)) na_count_by_column <- na_count_by_column %>%
+    dplyr::slice(1:max_cols)
+  
+  # tidy and sort na_count_all by column counts	
+  na_count_all_tidy <- na_count_all %>% 	
+    tidyr::pivot_longer(where(is.logical), names_to = "variable") %>%	
+    dplyr::filter(variable %in% na_count_by_column$var) %>%
+    dplyr::mutate(variable = factor(.data$variable, levels = na_count_by_column$var))  %>% 	
+    dplyr::mutate(none_missing = ifelse(.data$num_missing_cols == 0, TRUE, FALSE))
+  
+  # calculate the % of data shown
+  perc_shown <- 100*sum(na_count_by_pattern$count)/nrow(x)
+  
+  # main plot
+  main_plot <- na_count_all_tidy %>%
+    ggplot2::ggplot(ggplot2::aes(.data$variable, .data$pattern, fill = factor(.data$value), alpha = .data$none_missing)) +	
+    ggplot2::geom_tile(color = "white") +	
+    ggplot2::scale_x_discrete(labels = abbreviate(levels(na_count_all_tidy$variable), num_char)) +
+    ggplot2::scale_fill_manual(values = c("grey70", "mediumpurple")) +	
+    ggplot2::scale_alpha_manual(values = c(.7, 1)) +	
+    ggplot2::labs(y = "missing pattern",
+                  caption = paste0("These missing patterns represent ",
+                                   round(perc_shown, 1), "% of the rows.")) +	
+    ggplot2::guides(fill = "none", alpha = "none") +	
+    ggplot2::theme_classic(12)+
+    ggplot2::theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  
+  # check for "none missing" pattern
+  none_missing_pattern <- na_count_by_pattern %>%
+    dplyr::filter(.data$none_missing) %>% dplyr::pull(.data$pattern)
+  
+  if (length(none_missing_pattern) > 0) {	
+    column_count <- min(c(ncol(na_count_all)-2, max_cols+1))
+    main_plot <- main_plot +	
+      ggplot2::annotate("text", x = column_count/2,	
+               y = nrow(na_count_all) + 1 - as.numeric(as.character(none_missing_pattern)),	
+               label = "complete cases")	
+  }	
+  
+  # margin plots
+  
+  denom <- ifelse(percent, nrow(x)/100, 1)
+  
+  # top
+  missing_by_column_plot <- 
+    na_count_by_column %>% 
+    dplyr::mutate(var = abbreviate(var, num_char)) %>% 
+    ggplot2::ggplot(ggplot2::aes(forcats::fct_inorder(.data$var), .data$count/denom)) +	
+    ggplot2::geom_col(fill = "cornflowerblue", alpha = .7) +
+    ggplot2::scale_y_continuous(expand = c(0, 0), n.breaks = 3) +	
+    ggplot2::labs(x = "",
+                  y = ifelse(percent, "% rows \n missing:", "num rows \n missing:")) +	
+    ggplot2::theme_linedraw(12) + 	
+    ggplot2::theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+    ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(),	
+          panel.grid.minor.x = ggplot2::element_blank(),
+          )	
+  # right
+  missing_by_pattern_plot <- 
+    ggplot2::ggplot(na_count_by_pattern, ggplot2::aes(.data$pattern, .data$count/denom, alpha = .data$none_missing)) +
+    ggplot2::geom_col(fill = "cornflowerblue") +
+    ggplot2::coord_flip() +
+    ggplot2::scale_y_continuous(expand = c(0, 0), n.breaks = 3) +
+    ggplot2::scale_alpha_manual(values = c(.7, 1)) +
+    ggplot2::labs(x = "", y = ifelse(percent, "% rows", "row count")) +
+    ggplot2::guides(alpha = "none") +
+    ggplot2::theme_linedraw(12) +
+    ggplot2::theme(panel.grid.major.y = ggplot2::element_blank(), 
+          panel.grid.minor.y = ggplot2::element_blank())
+  
+  if (percent) {	
+    missing_by_column_plot <- missing_by_column_plot +
+      ggplot2::scale_y_continuous(expand = c(0, 0), n.breaks = 5,
+                         limits = c(0, 100))	
+    missing_by_pattern_plot <- missing_by_pattern_plot +
+      ggplot2::scale_y_continuous(expand = c(0, 0), n.breaks = 5,
+                         limits = c(0, 100))	
+  }	
+  
+  missing_by_column_plot + patchwork::plot_spacer() + 	
+    main_plot + missing_by_pattern_plot + 	
+    patchwork::plot_layout(widths = c(4, 1), heights = c(1, 4))
+}
+
+plot_missing(filter(Data_England, Div!="E0") ,max_cols = 18)
 
 ```
 
@@ -106,8 +466,9 @@ library(ggplot2)
 library(patchwork)
 
 # Boxplots for FTHG and FTAG
-p1 <- ggplot(Data_England, aes(y = FTHG)) +
-  geom_boxplot(fill = "lightblue", alpha = 0.7, outlier.color = "red", outlier.size = 2) +
+p1 <- ggplot(Data_England, aes(x = FTHG)) +
+  geom_bar(fill = "lightblue") +
+  facet_wrap(~Season)+
   labs(title = "Home Goals (FTHG) - Boxplot", y = "Goals") +
   theme_minimal()
 
@@ -116,7 +477,7 @@ p2 <- ggplot(Data_England, aes(y = FTAG)) +
   labs(title = "Away Goals (FTAG) - Boxplot", y = "Goals") +
   theme_minimal()
 
-p1 + p2
+p1
 
 
 ```
