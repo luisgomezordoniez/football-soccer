@@ -39,7 +39,7 @@ library(scales)   # para rescale()
 library(vcd)
 
 
-Data_England <- read_csv("https://github.com/luisgomezordoniez/football-soccer/raw/refs/heads/main/Data_England.csv")
+Data_England <- read_csv("https://github.com/luisgomezordoniez/football-soccer/raw/refs/heads/main/data/Data_England.csv")
 
 #summary(Data_England)
 
