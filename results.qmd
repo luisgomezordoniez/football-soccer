@@ -1,8 +1,8 @@
 # Results
 
-## Enlglish football through the years
+## Home Advantage
 
-We want to see how soccer has changed through the years in terms of attack and defense. Our hypothesis is that the english football has become more competitive. For proving this hypothesis we will analyze the differences among the teams that conform the Premier League, the dominance and the results of the matches.
+We want to see how soccer has changed through the years in terms of attack and defense. Our hypothesis is that the english football has become more competitive. For proving this hypothesis we will analyze the differences among the teams that conform the Premier League and the lower tiers, the dominance and the results of the matches.
 
 First of all, we know that goals can be a strong indicator to understand this, so we plan to base our first analysis on the average number of goals scored by teams.
 
@@ -10,35 +10,20 @@ First of all, we know that goals can be a strong indicator to understand this, s
 library(dplyr)
 library(lubridate)
 library(ggplot2)
-library(dplyr)
-library(lubridate)
-library(ggplot2)
 library(RColorBrewer)
 library(rnaturalearth)
 library(rnaturalearthhires)
 library(sf)
-library(ggplot2)
-library(dplyr)
 library(ggrepel)
 library(readr)
 library(forcats)
 library(FactoMineR)
 library(factoextra)
-library(ggplot2)
-library(dplyr)
-# Load required libraries
-library(ggplot2)
-library(dplyr)
 library(plotly)
-
-library(dplyr)
-library(tidyr)
-library(ggplot2)
 library(tidyr)
 library(ggalluvial)
-library(lubridate)
 library(GGally)
-library(scales)   # para rescale()
+library(scales)
 library(vcd)
 
 
@@ -56,6 +41,19 @@ Data_England =Data_England |>
 #summary(Data_England)
 
 Data_England$League <- factor(Data_England$League, levels =c("Premier League", "Championship","League One", "League Two"), ordered = TRUE)
+
+my_custom_theme <- function() {
+  theme_classic(base_size = 12) + # Start with a built-in theme as a base
+    theme(
+      plot.title = element_text(size = 14, face = "bold"),
+      plot.subtitle = element_text(size = 12, margin = margin(b = 10)),
+      axis.title = element_text(size = 12, face = "bold"),
+      axis.text = element_text(size = 10),
+      legend.position = "right"
+    )
+}
+
+Data_England$Year=as.numeric(substr(Data_England$Date,6,9))
 ```
 
 ```{r}
@@ -153,67 +151,23 @@ premier_goals_yearly |>
   scale_color_manual(values = c("Home" = "#1f77b4", "Away" = "#d62728")) +
   labs(
     title = "Average Home and Away Goals per Season — Premier League",
-    subtitle = "Only complete seasons (380 matches per season)",
     x = "Year",
     y = "Average Goals per Match",
     color = "Team"
   ) +
-  theme_minimal(base_size = 12) +
+  my_custom_theme()+
   theme(
-    legend.position = "bottom",
-    plot.title = element_text(size = 14, face = "bold")
+    legend.position = "bottom"
   )
 
 ```
+
+
+
 
 While the average number of goals by home teams has remained relatively stable since 1993, away teams show a clear upward trend in goals, reflecting more offensive strategies, especially since 2015. This suggests a reduction in the traditional home-field advantage.
 
-::: {.callout-note}
-Creo que el Cleveland Plot se ve mejor así.
-:::
 
-```{r fig.height=10}
-
-
-
-
-data_cleveland <- premier_goals_yearly |>
-  pivot_longer(
-    cols = c(avg_home_goals, avg_away_goals, avg_total_goals),
-    names_to  = "type",
-    values_to = "value"
-  ) |>
-  mutate(
-    type = case_when(
-      type == "avg_home_goals"  ~ "Home Goals",
-      type == "avg_away_goals"  ~ "Away Goals",
-      type == "avg_total_goals" ~ "Total Goals"
-    )
-  )
-
-ggplot(data_cleveland, aes(x = value, y = factor(Year))) +
-  geom_point(size = 2, color = "black") +
-  geom_segment(
-    aes(x = 0, xend = value, y = factor(Year), yend = factor(Year)),
-    linewidth = 0.6,
-    color = "gray60"
-  ) +
-  facet_wrap(~ type, scales = "free_x", ncol = 3) +
-  labs(
-    title = "Cleveland Plot — Average Goals per Season (Premier League)",
-    x = "Average Goals per Match",
-    y = "Season (Year)"
-  ) +
-  theme_minimal(base_size = 12) +
-  theme(
-    panel.spacing = unit(1, "lines"),
-    strip.text = element_text(size = 12, face = "bold"),
-    plot.title = element_text(size = 16, face = "bold")
-  )
-
-
-
-```
 
 Between 1993 and 2010, away teams scored about 1.10-1.15 goals per match, but since 2011 this number has increased to around 1.20-1.25. Starting in 2018, we can observe a sustained raise in away goals, reaching historic highs in 2023 and 2024, when they exceeded 1.45 goals per match.
 
@@ -253,412 +207,48 @@ results_yearly |>
     x = "Year",
     y = "Proportion of Matches"
   ) +
-  theme_minimal(base_size = 12) +
+  my_custom_theme()+
   theme(
-    legend.position = "bottom",
-    plot.title = element_text(size = 14, face = "bold")
+    legend.position = "bottom"
   )
 ```
 Over the past three decades, Premier League results show a decrease in draws, an increase in away-team victories, and relatively stable home-team victories. This suggests that the league has become more competitive and that the traditional home-field advantage has gradually diminished.
 
 
-## Location of Teams
 
-We have 116 teams across all the tiers, we can see that London and
+## Seasonal trends
 
-```{r fig.width=12, fig.height=12}
-{
-  stadiums <- data.frame(
-  team = c(
-    "Arsenal","Aston Villa","Bournemouth","Brentford","Brighton","Burnley",
-    "Chelsea","Crystal Palace","Everton","Fulham","Leeds","Leicester",
-    "Liverpool","Luton","Man City","Man United","Newcastle","Nott'm Forest",
-    "Sheffield United","Southampton","Sunderland","Tottenham","West Ham",
-    "Wolves","Cardiff","Swansea","Stoke","Norwich","West Brom","Huddersfield",
-    "QPR","Reading","Wigan","Blackburn","Bolton","Birmingham","Portsmouth",
-    "Blackpool","Derby","Grimsby","Stockport","Tranmere","Port Vale","Bury",
-    "Rushden & D","Hartlepool","Dag and Red","Hereford","Torquay","Boston",
-    "Kidderminster","Scarborough","Ipswich","Middlesbrough","Watford","Hull",
-    "Coventry","Charlton","Sheffield Weds","Wimbledon","Barnsley","Oldham",
-    "Swindon","Oxford","Wrexham","Bristol City","Millwall","Preston",
-    "Plymouth","Rotherham","Peterboro","Wycombe","Burton","Milton Keynes Dons",
-    "Doncaster","Bristol Rvs","Shrewsbury","Cambridge","Carlisle","Cheltenham",
-    "Fleetwood Town","Accrington","Morecambe","Forest Green","Chesterfield",
-    "Leyton Orient","Newport County","Barrow","Sutton","Yeovil","Scunthorpe",
-    "Colchester","Southend","Gillingham","Walsall","Notts County","Lincoln",
-    "Exeter","Northampton","Macclesfield","York","Barnet","Salford",
-    "Harrogate","Darlington","Halifax"
-  ),
-  stadium = c(
-    "Emirates Stadium","Villa Park","Vitality Stadium","Gtech Community Stadium",
-    "Falmer Stadium (AMEX)","Turf Moor","Stamford Bridge","Selhurst Park",
-    "Goodison Park","Craven Cottage","Elland Road",
-    "King Power Stadium","Anfield","Kenilworth Road","Etihad Stadium",
-    "Old Trafford","St James' Park","The City Ground","Bramall Lane",
-    "St Mary's Stadium","Stadium of Light","Tottenham Hotspur Stadium",
-    "London Stadium","Molineux Stadium","Cardiff City Stadium",
-    "Swansea.com Stadium","Bet365 Stadium","Carrow Road","The Hawthorns",
-    "John Smith's Stadium","Loftus Road","Select Car Leasing Stadium",
-    "DW Stadium","Ewood Park","Toughsheet Community Stadium","St Andrew's",
-    "Fratton Park","Bloomfield Road","Pride Park Stadium","Blundell Park",
-    "Edgeley Park","Prenton Park","Vale Park","Gigg Lane",
-    "Hayden Road","Victoria Park","Victoria Road","Edgar Street",
-    "Plainmoor","York Street","Aggborough","McCain Stadium",
-    "Portman Road","Riverside Stadium","Vicarage Road","MKM Stadium",
-    "Coventry Building Society Arena","The Valley","Hillsborough",
-    "Plough Lane","Oakwell","Boundary Park","County Ground",
-    "Kassam Stadium","Racecourse Ground","Ashton Gate","The Den","Deepdale",
-    "Home Park","New York Stadium","London Road Stadium",
-    "Adams Park","Pirelli Stadium","Stadium MK","Keepmoat Stadium",
-    "Memorial Stadium","Montgomery Waters Meadow","Abbey Stadium",
-    "Brunton Park","Whaddon Road","Highbury Stadium","Crown Ground",
-    "Mazuma Mobile Stadium","The New Lawn","Technique Stadium","Brisbane Road",
-    "Rodney Parade","Holker Street","Gander Green Lane","Huish Park",
-    "Glanford Park","JobServe Community Stadium","Roots Hall",
-    "Priestfield Stadium","Bescot Stadium","Meadow Lane","Sincil Bank",
-    "St James Park","Sixfields Stadium","Moss Rose","Bootham Crescent",
-    "The Hive Stadium","Peninsula Stadium","Wetherby Road","Blackwell Meadows",
-    "The Shay"
-  ),
-  lat = c(
-    51.5548,52.5091,50.7352,51.4909,50.8617,53.7891,
-    51.4817,51.3983,53.4387,51.4749,53.7788,52.6201,
-    53.4308,51.8841,53.4830,53.4631,54.9756,52.9392,
-    53.3703,50.9080,54.9144,51.6033,51.5387,52.5901,
-    51.4705,51.6429,52.9881,52.6226,52.5090,53.6499,
-    51.5093,51.4223,53.5463,53.7287,53.5807,52.4759,
-    50.7930,53.8055,52.9225,53.5683,53.4087,53.3779,
-    53.0335,53.5939,52.3338,54.6853,51.5593,52.0649,
-    50.4746,52.9691,52.3800,54.2770,52.0553,54.5828,
-    51.6501,53.7469,52.4497,51.4862,53.4283,51.4287,
-    53.5522,53.5517,51.5647,51.7166,53.0519,51.4402,
-    51.4851,53.7719,50.3804,53.4289,52.5646,51.6210,
-    52.8124,52.0084,53.5186,51.4854,52.6938,52.2039,
-    54.8931,51.9056,53.9248,53.7431,54.0723,51.6427,
-    53.2423,51.5583,51.5873,54.1202,51.3653,50.9328,
-    53.5850,51.9213,51.5458,51.3857,52.5694,52.9467,
-    53.2185,50.7291,52.2359,53.2505,53.9712,51.6190,
-    53.5042,54.0084,54.5194,53.7171
-  ),
-  lon = c(
-    -0.1064, -1.8848, -1.8383, -0.2877, -0.0837, -2.2302,
-    -0.1910, -0.0854, -2.9663, -0.2215, -1.5707, -1.1499,
-    -2.9609, -0.4465, -2.2003, -2.2913, -1.6215, -1.1309,
-    -1.4704, -1.3995, -1.3884, -0.0660, -0.1650, -2.1308,
-    -3.2031, -3.9345, -2.1764, 1.3080, -1.9546, -1.7681,
-    -0.2312, -0.9715, -2.6534, -2.4883, -2.4654, -1.8767,
-    -1.0560, -3.0475, -1.4475, -0.0381, -2.1643, -3.0768,
-    -2.1793, -2.3023, -0.6128, -1.2185, 0.1559, -2.7161,
-    -3.5432, -0.0345, -2.2384, -0.4120, 1.1565, -1.2185,
-    -0.4016, -0.3958, -1.4984, 0.0366, -1.5005, -0.1983,
-    -1.4674, -2.1386, -1.7766, -1.2223, -3.0039, -2.6416,
-    -0.0505, -2.6896, -4.1755, -1.3533, -0.2319, -0.8122,
-    -1.6251, -0.7554, -1.0851, -2.5855, -2.7483, -1.4720,
-    -2.9157, -2.0722, -3.0335, -2.3364, -2.8530, -2.2858,
-    -1.4284, -0.0153, -2.9818, -3.2201, -0.1989, -2.6644,
-    -0.6974, 0.8879, 0.7061, 0.5518, -1.9961, -1.1444,
-    -0.5487, -3.5222, -0.9200, -2.1158, -1.0543, -0.2796,
-    -2.2906, -1.5173, -1.5593, -1.8624
-  )
-)
-}
-
-
-uk_states <- ne_states(country = "united kingdom", returnclass = "sf")
-
-# Filter for England and Wales and group by regions
-england_wales_regions <- uk_states %>%
-  filter(geonunit %in% c("England", "Wales")) %>%
-  group_by(region) %>%
-  summarise(geometry = st_union(geometry))
-
-
-england_wales_regions <- uk_states %>%
-  filter(geonunit %in% c("England", "Wales")) %>%
-  group_by(region) %>%
-  summarise(geometry = st_union(geometry))
-
-pos <- position_jitter(width = 0.3, seed = 2)
-
-premier_league_teams <- unique(filter(Data_England, Div=="E0" & Season=="2024/2025")$HomeTeam)
-
-ggplot() +
-  geom_sf(data = england_wales_regions,aes(fill=region), 
-          color = "white", linewidth = 0.3) +
-  geom_point(data = stadiums, aes(x = lon, y = lat), color = "black", size = 2.5, alpha = .5) +
-  geom_label_repel(data = stadiums %>% filter(team %in% premier_league_teams),
-                   aes(x = lon, y = lat, label = team),  
-                   min.segment.length = 0, seed = 42, max.overlaps = 30,
-                   size=2.5) +
-  coord_sf(xlim = c(-6, 2), ylim = c(50, 56)) +
-  labs(title="Location of English football clubs Stadiums",
-       fill="Region",
-       caption="Labels only of clubs competing in Premier League during season 2024/2025")+
-  theme_minimal()
-
-```
-
-```{r fig.width=10, fig.height=10}
-
-# convert stadiums to sf
-stadiums_sf <- st_as_sf(
-  stadiums,
-  coords = c("lon", "lat"),
-  crs = 4326
-)
-# count stadiums per region (point-in-polygon)
-stadiums_by_region <- st_join(stadiums_sf, england_wales_regions, join = st_within) %>%
-  st_drop_geometry() %>%
-  count(region, name = "n_teams")
-
-# join counts back to regions
-england_wales_regions_cnt <- england_wales_regions %>%
-  left_join(stadiums_by_region, by = "region")
-
-premier_league_teams <- unique(
-  filter(Data_England, Div == "E0", Season == "2024/2025")$HomeTeam
-)
-
-ggplot() +
-  geom_sf(data = england_wales_regions_cnt,
-          aes(fill = n_teams), color = "white", linewidth = 0.3) +
-  scale_fill_gradient(
-    name  = "Number of teams",
-    low   = "lightblue",
-    high  = "darkblue",
-    na.value = "grey90"
-  ) +
-  geom_point(data = stadiums, aes(x = lon, y = lat),
-             color = "black", size = 2.5, alpha = 0.5) +
-  geom_label_repel(
-    data = stadiums %>% filter(team %in% premier_league_teams),
-    aes(x = lon, y = lat, label = team),
-    min.segment.length = 0, seed = 42, max.overlaps = 30,
-    size = 2.5
-  ) +
-  coord_sf(xlim = c(-6, 2), ylim = c(50, 56)) +
-  labs(
-    title = "Location of English Football Club Stadiums",
-    caption = "Fill = number of stadiums per region; labels = Premier League 2024/2025 clubs"
-  ) +
-  theme_minimal()
-
-
-```
-
-To Do: Add number of teams per region. (?)
-
-## Team performance by league over the years
-
-```{r fig.height=9, fig.width=7}
-calculate_points <- function(full_time_result, is_home_team) {
-  case_when(
-    full_time_result == "H" & is_home_team ~ 3,
-    full_time_result == "A" & !is_home_team ~ 3,
-    full_time_result == "D" ~ 1,
-    TRUE ~ 0
-  )
-}
-
-
-# 2. CALCULATE LEAGUE STANDINGS
-# Home results
-home_results <- Data_England %>%
-  select(Season, Div, HomeTeam, FTHG, FTAG, FTR,Tier) %>%
-  rename(Team = HomeTeam, GoalsFor = FTHG, GoalsAgainst = FTAG) %>%
-  mutate(
-    Points = calculate_points(FTR, TRUE),
-    Venue = "Home"
-  )
-
-# Away results
-away_results <- Data_England %>%
-  select(Season, Div, AwayTeam, FTHG, FTAG, FTR,Tier) %>%
-  rename(Team = AwayTeam, GoalsFor = FTAG, GoalsAgainst = FTHG) %>%
-  mutate(
-    Points = calculate_points(FTR, FALSE),
-    Venue = "Away"
-  )
-
-# Combine and calculate standings
-all_results <- bind_rows(home_results, away_results)
-
-season_standings <- all_results %>%
-  group_by(Season, Div, Team,Tier) %>%
-  summarise(
-    Played = n(),
-    Wins = sum(Points == 3),
-    Draws = sum(Points == 1),
-    Losses = sum(Points == 0),
-    GoalsFor = sum(GoalsFor),
-    GoalsAgainst = sum(GoalsAgainst),
-    GoalDifference = GoalsFor - GoalsAgainst,
-    Points = sum(Points),
-    .groups = 'drop'
-  ) %>%
-  group_by(Season, Div) %>%
-  mutate(
-    Position = rank(desc(Points), ties.method = "first")
-  ) %>%
-  arrange(Season, Div, Position)
-
-
-titles_data=season_standings |>
-  filter(Div=="E0" &Position==1) |>
-  group_by(Team) |>
-  summarise(Titles=n())
-
-# Merge titles data with seasons data
-
-# Create the plot with highlighted Tier 1 teams
-
-most_recent_season <- max(Data_England$Season, na.rm = TRUE)
-current_tier1_teams <- Data_England %>%
-  filter(Div == "E0" & Season == most_recent_season) %>%
-  distinct(HomeTeam) %>%
-  pull(HomeTeam)
-
-Data_Teams <- Data_England |>
-  filter(Div == "E0") |>
-  group_by(HomeTeam) |>
-  summarize(Seasons = n_distinct(Season)) |>
-  mutate(
-    # Identify if team is currently in Tier 1
-    Current_Tier1 = HomeTeam %in% current_tier1_teams,
-    # Create fill color based on Tier 1 status
-    Team_Type = ifelse(Current_Tier1, "Current Tier 1", "Other Teams")
-  )
-
-
-Data_Teams_Enhanced <- Data_Teams |>
-  left_join(titles_data, by = c("HomeTeam" = "Team")) |>
-  mutate(
-    Titles = replace_na(Titles, 0),
-    Current_Tier1 = HomeTeam %in% current_tier1_teams,
-    Team_Type = ifelse(Current_Tier1, "Premier League", "Lower Tiers")
-  )
-
-
-# Plot with titles in labels
-Data_Teams_Enhanced %>%
-  mutate(HomeTeam = fct_reorder(HomeTeam, Seasons)) %>%
-  ggplot(aes(x = HomeTeam, y = Seasons, fill = Team_Type)) +
-  geom_col() +
-  geom_col(aes(x = HomeTeam, y = Titles),fill="gold3")+
-  geom_text(aes(label = ifelse(Titles > 0, 
-                               paste0("Titles: ", Titles),""
-  )),
-  # y = 0.5,  # Position at the start of the bar
-  hjust = 0, size = 3.5, color = "black",fontface = "bold") +
-  coord_flip() +
-  labs(
-    title = "Premier League Seasons and Titles",
-    x = "Team",
-    y = "Seasons",
-    fill = "",
-    caption=""
-  ) +
-  scale_fill_manual(
-    values = c("Premier League" = "steelblue", "Lower Tiers" = "lightsteelblue")
-  ) +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
-  theme_minimal(base_size = 13) +
-  theme(legend.position = "bottom")
-
-```
-## Ridgeline ideas
 ```{r}
-library(ggplot2)
-library(ggridges)
-library(dplyr)
+library(tidyverse)
+library(lubridate)
+Seasons=c("2000/2001", "2004/2005", "2009/2010", "2014/2015", "2019/2020", "2023/2024")
+# 1. Prepare Data
+goals_monthly <- Data_England |>
+  filter(Season %in% Seasons & Div=="E0") |>
+  mutate(MatchDate = lubridate::dmy(Date),                # Convert string to Date
+         Month = lubridate::month(MatchDate, label = TRUE, abbr = TRUE)) |>
+  # Filter out rare off-season games (June/July)
+  filter(!Month %in% c("Jun", "Jul")) |>
+  # Reorder months to follow the Football Season (Aug -> May)
+  mutate(Month = factor(Month, levels = c("Aug", "Sep", "Oct", "Nov", "Dec", 
+                                          "Jan", "Feb", "Mar", "Apr", "May"))) |>
+  group_by(Month, Season) |>
+  summarise(AvgGoals = mean(FTHG + FTAG, na.rm = TRUE), .groups = "drop")
 
-# 1. Prepare the data (Calculate Goal Difference)
-plot_data <- Data_England %>%
-  mutate(GoalDiff = FTHG - FTAG,
-         # Reorder League so Premier League is at the top/bottom as preferred
-         League = factor(League, levels = c("Premier League", "Championship", "League One", "League Two")))
-
-# 2. Create the Ridgeplot
-ggplot(plot_data, aes(x = GoalDiff, y = League, fill = stat(x))) +
-  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
-  scale_fill_viridis_c(name = "Goal Diff", option = "C") +
-  labs(title = "Home Advantage by League",
-       subtitle = "Distribution of Goal Difference (Home Goals - Away Goals)",
-       x = "Goal Difference (Positive = Home Win)",
-       y = "League") +
-  theme_minimal() +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "white") # Center line
-
-# 2. Evolution of Aggression
-# Filter: Start from 2000 (when card data became reliable)
-aggression_data <- Data_England %>%
-  filter(Season >= 2000) %>%  # Adjust year format if Season is a string (e.g., "2000/2001")
-  mutate(TotalYellows = HY + AY) %>%
-  filter(!is.na(TotalYellows))
-
-ggplot(aggression_data, aes(x = TotalYellows, y = as.factor(Season), fill = ..x..)) +
-  geom_density_ridges_gradient(scale = 2.5, rel_min_height = 0.01) +
-  scale_fill_gradient(low = "yellow", high = "orange", name = "Cards") +
+# 2. Plot
+ggplot(goals_monthly, aes(x = Month, y = AvgGoals, group = Season, color = Season)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
   labs(
-    title = "Evolution of Aggression",
-    subtitle = "Distribution of Total Yellow Cards per Game by Season",
-    x = "Total Yellow Cards (Home + Away)",
-    y = "Season"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "none") # Hide legend if preferred for cleaner look
-
-
-Data_England$Hour=as.numeric(format(Data_England$Time, "%H"))
-# 3. Entertainment Value by Kick-off Time
-# Filter: Data only exists reliably after ~2019 for specific times
-time_data <- Data_England %>%
-  filter(!is.na(Hour), !is.na(FTHG), !is.na(FTAG)) %>%
-  mutate(TotalGoals = FTHG + FTAG,
-         HourLabel = factor(paste0(Hour, ":00"))) # Create readable labels like "15:00"
-
-ggplot(time_data, aes(x = TotalGoals, y = reorder(HourLabel, desc(HourLabel)), fill = ..x..)) +
-  geom_density_ridges_gradient(scale = 2, rel_min_height = 0.01, quantile_lines = TRUE, quantiles = 2) +
-  scale_fill_viridis_c(option = "magma", name = "Goals") +
-  labs(
-    title = "Entertainment Value by Kick-off Time",
-    subtitle = "Are evening games higher scoring than early kick-offs?",
-    x = "Total Goals in Match",
-    y = "Kick-off Hour"
-  ) +
-  theme_minimal()
-
-
-# 4. Shot Volume by League
-# Filter: Start from 2000 (when shot data became reliable)
-shot_data <- Data_England %>%
-  filter(Season >= 2000) %>%
-  mutate(TotalShots = HS + AS,
-         TotalGoals= FTHG+FTAG,
-         GoalsShots=TotalGoals/TotalShots) %>%
-  filter(!is.na(GoalsShots)) %>%
-  # Optional: Reorder leagues so Premier League is at the top
-  mutate(League = factor(League, levels = c("Premier League", "Championship", "League One", "League Two")))
-
-ggplot(shot_data, aes(x = TotalGoals, y = Season, fill = stat(x))) +
-  geom_density_ridges_gradient(scale = 1.5, rel_min_height = 0.01) +
-  scale_fill_viridis_c(option = "D", name = "Shots") +
-  labs(
-    title = "Shot Volume: Premier League vs Lower Tiers",
-    subtitle = "Distribution of Total Shots (Home + Away) per Game",
-    x = "Total Shots per Game",
-    y = "League"
-  ) +
-  theme_minimal()
+    title = "End of Season Madness?",
+    subtitle = "Average Goals per Game by Month",
+    y = "Avg Total Goals",
+    x = "Month of Season") + my_custom_theme()
 ```
 
-## Cambio en texto
-A typical league is highly competitive, besides fighting to become champions, teams also try to qualify for European competitions or avoid relegation.
 
 
-::: {.callout-note}
-Me parece que podemos dejar todas las jornadas
-:::
+
 
 ```{r fig.width=16, fig.height=12}
 # Alluvial of the standigns of each league over the last years.
@@ -725,7 +315,7 @@ standings_by_round <- results_cum |>
   ungroup()
 
 max_round <- max(standings_by_round$game_number, na.rm = TRUE)
-cuts <- sort(unique(c(1, seq(5, max_round, by = 1), max_round)))
+cuts <- sort(unique(c(1, seq(3, max_round, by = 3), max_round)))
 
 alluvial_df <- standings_by_round |>
   filter(game_number %in% cuts) |>
@@ -734,35 +324,17 @@ alluvial_df <- standings_by_round |>
     PosFactor = factor(Position, levels = 1:20)
   )
 
-ggplot(
-  alluvial_df,
-  aes(x = Matchday,
-      stratum  = PosFactor,
-      alluvium = Team,
-      y        = 1,
-      fill     = Team)
-) +
-  geom_flow(
-    stat          = "alluvium",
-    lode.guidance = "frontback",
-    alpha         = 0.65
-  ) +
-  geom_stratum(width = 0.35, color = "grey30") +
-  stat_stratum(
-    geom  = "text",
-    aes(label = after_stat(stratum)),
-    size  = 3,
-    color = "black"
-  ) +
+ggplot(alluvial_df, aes(x = Matchday, stratum  = PosFactor, alluvium = Team, y= 1,
+      fill     = Team)) +
+  geom_flow(stat= "alluvium", lode.guidance = "frontback", alpha= 0.65) +
+  geom_stratum(width = 0.25, color = "grey30") +
+  stat_stratum(geom  = "text", aes(label = after_stat(stratum)),size  = 3,color = "black") +
   guides(fill = "none") +  
-
-  # Names of the teams after the last round
   geom_text(
     stat = "alluvium",
     data = dplyr::filter(
       alluvial_df,
-      Matchday == levels(Matchday)[length(levels(Matchday))]
-    ),
+      Matchday == levels(Matchday)[length(levels(Matchday))]),
     aes(label = Team),
     size      = 3,
     color     = "black",
@@ -777,10 +349,10 @@ ggplot(
       "— positions shown every 5 matchdays"
     ),
     x        = "Matchday",
-    y        = "Number of teams",
+    y        = "Position",
     caption  = "Source: football-data.co.uk | EDAV Final Project"
   ) +
-  theme_minimal(base_size = 14) +
+   my_custom_theme()+
   theme(
     panel.grid.major.x = element_blank(),
     panel.grid.minor   = element_blank()
@@ -788,11 +360,133 @@ ggplot(
 
 
 ```
+
+
+
 The Premier League is considered an extremely competitive league due to its more equitable distribution of broadcasting revenue, te quality of signings, and the high athletic level of the playeres. Nevertheless, if we look at last season´s table, we can identify three types of teams: those that fight for the top positions, those that remain in the middle of the table, and those that struggle to avoid finishing last. The first ten matches of the 2024 were not definite to predict how the teams would end the season were not enough to predict how the teams would finish; after the tenth match, the die was pretty much cast, and the battle unfolded within each of these three groups.
 
-::: {.callout-note}
-¿Si ponemos todos los años?
-:::
+
+## Team performance by league over the years
+
+```{r fig.height=9, fig.width=7}
+calculate_points <- function(full_time_result, is_home_team) {
+  case_when(
+    full_time_result == "H" & is_home_team ~ 3,
+    full_time_result == "A" & !is_home_team ~ 3,
+    full_time_result == "D" ~ 1,
+    TRUE ~ 0
+  )
+}
+
+
+# 2. CALCULATE LEAGUE STANDINGS
+# Home results
+home_results <- Data_England |>
+  select(Season, Div, HomeTeam, FTHG, FTAG, FTR,Tier) |>
+  rename(Team = HomeTeam, GoalsFor = FTHG, GoalsAgainst = FTAG) |>
+  mutate(
+    Points = calculate_points(FTR, TRUE),
+    Venue = "Home"
+  )
+
+# Away results
+away_results <- Data_England |>
+  select(Season, Div, AwayTeam, FTHG, FTAG, FTR,Tier) |>
+  rename(Team = AwayTeam, GoalsFor = FTAG, GoalsAgainst = FTHG) |>
+  mutate(
+    Points = calculate_points(FTR, FALSE),
+    Venue = "Away"
+  )
+
+# Combine and calculate standings
+all_results <- bind_rows(home_results, away_results)
+
+season_standings <- all_results |>
+  group_by(Season, Div, Team,Tier) |>
+  summarise(
+    Played = n(),
+    Wins = sum(Points == 3),
+    Draws = sum(Points == 1),
+    Losses = sum(Points == 0),
+    GoalsFor = sum(GoalsFor),
+    GoalsAgainst = sum(GoalsAgainst),
+    GoalDifference = GoalsFor - GoalsAgainst,
+    Points = sum(Points),
+    .groups = 'drop'
+  ) |>
+  group_by(Season, Div) |>
+  mutate(
+    Position = rank(desc(Points), ties.method = "first")
+  ) |>
+  arrange(Season, Div, Position)
+
+
+titles_data=season_standings |>
+  filter(Div=="E0" &Position==1) |>
+  group_by(Team) |>
+  summarise(Titles=n())
+
+# Merge titles data with seasons data
+
+# Create the plot with highlighted Tier 1 teams
+
+most_recent_season <- max(Data_England$Season, na.rm = TRUE)
+current_tier1_teams <- Data_England |>
+  filter(Div == "E0" & Season == most_recent_season) |>
+  distinct(HomeTeam) |>
+  pull(HomeTeam)
+
+Data_Teams <- Data_England |>
+  filter(Div == "E0") |>
+  group_by(HomeTeam) |>
+  summarize(Seasons = n_distinct(Season)) |>
+  mutate(
+    # Identify if team is currently in Tier 1
+    Current_Tier1 = HomeTeam %in% current_tier1_teams,
+    # Create fill color based on Tier 1 status
+    Team_Type = ifelse(Current_Tier1, "Current Tier 1", "Other Teams")
+  )
+
+
+Data_Teams_Enhanced <- Data_Teams |>
+  left_join(titles_data, by = c("HomeTeam" = "Team")) |>
+  mutate(
+    Titles = replace_na(Titles, 0),
+    Current_Tier1 = HomeTeam %in% current_tier1_teams,
+    Team_Type = ifelse(Current_Tier1, "Premier League", "Lower Tiers")
+  )
+
+
+# Plot with titles in labels
+Data_Teams_Enhanced |>
+  mutate(HomeTeam = fct_reorder(HomeTeam, Seasons)) |>
+  ggplot(aes(x = HomeTeam, y = Seasons, fill = Team_Type)) +
+  geom_col() +
+  geom_col(aes(x = HomeTeam, y = Titles),fill="gold3")+
+  geom_text(aes(label = ifelse(Titles > 0, 
+                               paste0("Titles: ", Titles),""
+  )),
+  # y = 0.5,  # Position at the start of the bar
+  hjust = 0, size = 3.5, color = "black",fontface = "bold") +
+  coord_flip() +
+  labs(
+    title = "Premier League Seasons and Titles",
+    x = "Team",
+    y = "Seasons",
+    fill = "",
+    caption=""
+  ) +
+  scale_fill_manual(
+    values = c("Premier League" = "steelblue", "Lower Tiers" = "lightsteelblue")
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  my_custom_theme()+
+  theme(legend.position = "bottom")
+
+```
+
+
+
 
 ```{r}
 
@@ -896,12 +590,7 @@ ggplot(
     y        = NULL,
     caption  = "Source: football-data.co.uk | EDAV Final Project"
   ) +
-  theme_minimal(base_size = 13) +
-  theme(
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor   = element_blank(),
-    axis.text.y = element_blank()
-  )
+  my_custom_theme()
 ```
 If we go back 25 years and look at the Premier League standings for the 2000-2001 season, we can clearly see more competitiveness than by analyzing just one season. Of the twenty teams that played in the Premier League twenty-five years ago, only ten remain in the league for the 2023-2024 season. Among them, there are teams like Arsenal, Liverpool, and Chelsea, which have maintained a relatively similar position from 2000 to today; teams like Aston Villa and Tottenham, which climbed in the standings over the years, moving from the eighth and twelfth to fourth and ninth, respectively; and teams that have changed dramatically, such as Manchester United, which held first place in 2000-2001 and is now in eighth, or Manchester City, which was in eighteenth place in 2000-2001 and is now in first place. 
 
@@ -952,32 +641,274 @@ ggplot(
     x        = "Season",
     y        = NULL,
     caption  = "Source: football-data.co.uk | EDAV Final Project"
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor   = element_blank(),
-    axis.text.y = element_blank()
-  )
+  ) + my_custom_theme()
 ```
 When we analyze the teams in the current season and compare their historical positions, we can confirm the behavior observed in the previous plot. We also we see that all the teams ranked from tenth place downward were not competing in the Premier League twenty-five years ago. Most of them were already in the league five years ago, but some were not consistently present before and have only recently been promoted to the Premier League, such as Bournemouth, Brentford, Nottingham Forest, and Luton.
 
 This is a positive sign the league's competitiveness as it indicates that newly promoted teams can enter the Premier League and compete with the top clubs.
 
+## The English Football System
+
+### Locations
+We have 116 teams across all the tiers, we can see that London and
+
+```{r fig.width=12, fig.height=12}
+{
+  stadiums <- data.frame(
+  team = c(
+    "Arsenal","Aston Villa","Bournemouth","Brentford","Brighton","Burnley",
+    "Chelsea","Crystal Palace","Everton","Fulham","Leeds","Leicester",
+    "Liverpool","Luton","Man City","Man United","Newcastle","Nott'm Forest",
+    "Sheffield United","Southampton","Sunderland","Tottenham","West Ham",
+    "Wolves","Cardiff","Swansea","Stoke","Norwich","West Brom","Huddersfield",
+    "QPR","Reading","Wigan","Blackburn","Bolton","Birmingham","Portsmouth",
+    "Blackpool","Derby","Grimsby","Stockport","Tranmere","Port Vale","Bury",
+    "Rushden & D","Hartlepool","Dag and Red","Hereford","Torquay","Boston",
+    "Kidderminster","Scarborough","Ipswich","Middlesbrough","Watford","Hull",
+    "Coventry","Charlton","Sheffield Weds","Wimbledon","Barnsley","Oldham",
+    "Swindon","Oxford","Wrexham","Bristol City","Millwall","Preston",
+    "Plymouth","Rotherham","Peterboro","Wycombe","Burton","Milton Keynes Dons",
+    "Doncaster","Bristol Rvs","Shrewsbury","Cambridge","Carlisle","Cheltenham",
+    "Fleetwood Town","Accrington","Morecambe","Forest Green","Chesterfield",
+    "Leyton Orient","Newport County","Barrow","Sutton","Yeovil","Scunthorpe",
+    "Colchester","Southend","Gillingham","Walsall","Notts County","Lincoln",
+    "Exeter","Northampton","Macclesfield","York","Barnet","Salford",
+    "Harrogate","Darlington","Halifax"
+  ),
+  stadium = c(
+    "Emirates Stadium","Villa Park","Vitality Stadium","Gtech Community Stadium",
+    "Falmer Stadium (AMEX)","Turf Moor","Stamford Bridge","Selhurst Park",
+    "Goodison Park","Craven Cottage","Elland Road",
+    "King Power Stadium","Anfield","Kenilworth Road","Etihad Stadium",
+    "Old Trafford","St James' Park","The City Ground","Bramall Lane",
+    "St Mary's Stadium","Stadium of Light","Tottenham Hotspur Stadium",
+    "London Stadium","Molineux Stadium","Cardiff City Stadium",
+    "Swansea.com Stadium","Bet365 Stadium","Carrow Road","The Hawthorns",
+    "John Smith's Stadium","Loftus Road","Select Car Leasing Stadium",
+    "DW Stadium","Ewood Park","Toughsheet Community Stadium","St Andrew's",
+    "Fratton Park","Bloomfield Road","Pride Park Stadium","Blundell Park",
+    "Edgeley Park","Prenton Park","Vale Park","Gigg Lane",
+    "Hayden Road","Victoria Park","Victoria Road","Edgar Street",
+    "Plainmoor","York Street","Aggborough","McCain Stadium",
+    "Portman Road","Riverside Stadium","Vicarage Road","MKM Stadium",
+    "Coventry Building Society Arena","The Valley","Hillsborough",
+    "Plough Lane","Oakwell","Boundary Park","County Ground",
+    "Kassam Stadium","Racecourse Ground","Ashton Gate","The Den","Deepdale",
+    "Home Park","New York Stadium","London Road Stadium",
+    "Adams Park","Pirelli Stadium","Stadium MK","Keepmoat Stadium",
+    "Memorial Stadium","Montgomery Waters Meadow","Abbey Stadium",
+    "Brunton Park","Whaddon Road","Highbury Stadium","Crown Ground",
+    "Mazuma Mobile Stadium","The New Lawn","Technique Stadium","Brisbane Road",
+    "Rodney Parade","Holker Street","Gander Green Lane","Huish Park",
+    "Glanford Park","JobServe Community Stadium","Roots Hall",
+    "Priestfield Stadium","Bescot Stadium","Meadow Lane","Sincil Bank",
+    "St James Park","Sixfields Stadium","Moss Rose","Bootham Crescent",
+    "The Hive Stadium","Peninsula Stadium","Wetherby Road","Blackwell Meadows",
+    "The Shay"
+  ),
+  lat = c(
+    51.5548,52.5091,50.7352,51.4909,50.8617,53.7891,
+    51.4817,51.3983,53.4387,51.4749,53.7788,52.6201,
+    53.4308,51.8841,53.4830,53.4631,54.9756,52.9392,
+    53.3703,50.9080,54.9144,51.6033,51.5387,52.5901,
+    51.4705,51.6429,52.9881,52.6226,52.5090,53.6499,
+    51.5093,51.4223,53.5463,53.7287,53.5807,52.4759,
+    50.7930,53.8055,52.9225,53.5683,53.4087,53.3779,
+    53.0335,53.5939,52.3338,54.6853,51.5593,52.0649,
+    50.4746,52.9691,52.3800,54.2770,52.0553,54.5828,
+    51.6501,53.7469,52.4497,51.4862,53.4283,51.4287,
+    53.5522,53.5517,51.5647,51.7166,53.0519,51.4402,
+    51.4851,53.7719,50.3804,53.4289,52.5646,51.6210,
+    52.8124,52.0084,53.5186,51.4854,52.6938,52.2039,
+    54.8931,51.9056,53.9248,53.7431,54.0723,51.6427,
+    53.2423,51.5583,51.5873,54.1202,51.3653,50.9328,
+    53.5850,51.9213,51.5458,51.3857,52.5694,52.9467,
+    53.2185,50.7291,52.2359,53.2505,53.9712,51.6190,
+    53.5042,54.0084,54.5194,53.7171
+  ),
+  lon = c(
+    -0.1064, -1.8848, -1.8383, -0.2877, -0.0837, -2.2302,
+    -0.1910, -0.0854, -2.9663, -0.2215, -1.5707, -1.1499,
+    -2.9609, -0.4465, -2.2003, -2.2913, -1.6215, -1.1309,
+    -1.4704, -1.3995, -1.3884, -0.0660, -0.1650, -2.1308,
+    -3.2031, -3.9345, -2.1764, 1.3080, -1.9546, -1.7681,
+    -0.2312, -0.9715, -2.6534, -2.4883, -2.4654, -1.8767,
+    -1.0560, -3.0475, -1.4475, -0.0381, -2.1643, -3.0768,
+    -2.1793, -2.3023, -0.6128, -1.2185, 0.1559, -2.7161,
+    -3.5432, -0.0345, -2.2384, -0.4120, 1.1565, -1.2185,
+    -0.4016, -0.3958, -1.4984, 0.0366, -1.5005, -0.1983,
+    -1.4674, -2.1386, -1.7766, -1.2223, -3.0039, -2.6416,
+    -0.0505, -2.6896, -4.1755, -1.3533, -0.2319, -0.8122,
+    -1.6251, -0.7554, -1.0851, -2.5855, -2.7483, -1.4720,
+    -2.9157, -2.0722, -3.0335, -2.3364, -2.8530, -2.2858,
+    -1.4284, -0.0153, -2.9818, -3.2201, -0.1989, -2.6644,
+    -0.6974, 0.8879, 0.7061, 0.5518, -1.9961, -1.1444,
+    -0.5487, -3.5222, -0.9200, -2.1158, -1.0543, -0.2796,
+    -2.2906, -1.5173, -1.5593, -1.8624
+  )
+)
+}
+
+
+uk_states <- ne_states(country = "united kingdom", returnclass = "sf")
+
+# Filter for England and Wales and group by regions
+england_wales_regions <- uk_states |>
+  filter(geonunit %in% c("England", "Wales")) |>
+  group_by(region) |>
+  summarise(geometry = st_union(geometry))
+
+
+england_wales_regions <- uk_states |>
+  filter(geonunit %in% c("England", "Wales")) |>
+  group_by(region) |>
+  summarise(geometry = st_union(geometry))
+
+pos <- position_jitter(width = 0.3, seed = 2)
+
+premier_league_teams <- unique(filter(Data_England, Div=="E0" & Season=="2024/2025")$HomeTeam)
+
+
+# convert stadiums to sf
+stadiums_sf <- st_as_sf(
+  stadiums,
+  coords = c("lon", "lat"),
+  crs = 4326
+)
+# count stadiums per region (point-in-polygon)
+stadiums_by_region <- st_join(stadiums_sf, england_wales_regions, join = st_within) |>
+  st_drop_geometry() |>
+  count(region, name = "n_teams")
+
+# join counts back to regions
+england_wales_regions_cnt <- england_wales_regions |>
+  left_join(stadiums_by_region, by = "region")
+
+premier_league_teams <- unique(
+  filter(Data_England, Div == "E0", Season == "2024/2025")$HomeTeam
+)
+
+ggplot() +
+  geom_sf(data = england_wales_regions_cnt,
+          aes(fill = n_teams), color = "white", linewidth = 0.3) +
+  scale_fill_gradient(
+    name  = "Number of teams",
+    low   = "lightblue",
+    high  = "darkblue",
+    na.value = "grey90"
+  ) +
+  geom_point(data = stadiums, aes(x = lon, y = lat),
+             color = "black", size = 2.5, alpha = 0.5) +
+  geom_label_repel(
+    data = stadiums |> filter(team %in% premier_league_teams),
+    aes(x = lon, y = lat, label = team),
+    min.segment.length = 0, seed = 42, max.overlaps = 30,
+    size = 2.5
+  ) +
+  coord_sf(xlim = c(-6, 2), ylim = c(50, 56)) +
+  labs(
+    title = "Location of English Football Club Stadiums",
+    caption = "Fill = number of stadiums per region; labels = Premier League 2024/2025 clubs"
+  ) +
+   my_custom_theme()
+
+
+```
+
+
+### Tier dynamics
+
+```{r fig.height=12}
+
+Data_England_Matches=Data_England |>
+  group_by(Season, Div) |>
+  summarise(count=n(),
+            teams=n_distinct(HomeTeam))
+
+
+
+x=Data_England |>
+  filter(is.na(Tier)==T)
+
+# Get unique teams and their tiers by season
+team_timeline <- Data_England |>
+  select(Season, HomeTeam, Tier, League) |>
+  rename(Team = HomeTeam) |>
+  bind_rows(
+    Data_England |>
+      select(Season, AwayTeam, Tier, League) |>
+      rename(Team = AwayTeam)
+  ) |>
+  distinct(Season, Team, Tier, League) |>
+  arrange(Team, Season)
+
+Teams=Data_England |>
+  group_by(HomeTeam) |>
+  summarise(conteo=n(),
+            divs=n_distinct(Tier))
+
+Teams=Teams |>
+  filter(divs>=4)
+
+selected_teams=unique(Teams$HomeTeam)
+
+teams_timeline <- team_timeline |>
+  filter(Team %in% Teams$HomeTeam) |>
+  complete(Season = unique(team_timeline$Season), Team = selected_teams) |>
+  group_by(Team) |>
+  fill(Tier, League, .direction = "downup")
+
+
+current_tiers <- teams_timeline |>
+  group_by(Team) |>
+  filter(Season == max(Season)) |>
+  select(Team, Current_Tier = Tier)
+
+teams_timeline <- teams_timeline |>
+  left_join(current_tiers, by = "Team")
+
+
+
+# Facet wrap - each team gets its own panel
+teams_timeline <- team_timeline |>
+  filter(Team %in% selected_teams) |>
+  complete(Season = unique(team_timeline$Season), Team) |>
+  group_by(Team) |>
+  fill(Tier, League, .direction = "down") |>
+  filter(!is.na(Tier))
+
+ggplot(teams_timeline, aes(x = Season, y = Tier, group = Team)) +
+  geom_line(color = "steelblue", linewidth = 1.2) +
+  geom_point(color = "darkblue", size = 2) +
+  scale_y_discrete(limits=rev) +
+  facet_wrap(~ Team, ncol = 4) +  # 4 columns, 5 rows for 17 teams
+  labs(
+    title = "Team Performance Timelines (1993-2024)",
+    x = "Season",
+    y = "Tier"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+    axis.text.y = element_text(size = 8),
+    strip.text = element_text(face = "bold", size = 9),
+    panel.spacing = unit(1, "lines")
+  )
+
+
+```
+
+
+To Do: Add number of teams per region. (?)
+
+
+
+
+
 ## Relation among numeric variables
 
-::: {.callout-note}
-Ya no tenemos odds en la tabla. Creo que se le pueden agregar más variables al PCP.
-:::
-
-We would like to conduct and analysis to examine the relationships among the different numeric variables in the dataset, for example: the number of goals, (home/away), shots, corners, offsides, total card points (yellow + red), win odds, and draw odds.
 
 
-
-## First option
-Demasiadas líneas y no se entiende bien qué pasa con ellas. Dos opciones:
-1. Solo dejar la última temporada.
-2. Hacerla interactiva.
 
 ```{r}
 
@@ -1022,7 +953,7 @@ team_stats <- bind_rows(
     .groups = "drop"
   )
 
-seasons_focus <- c("2000/2001", "2009/2010", "2023/2024")
+seasons_focus <- c("2000/2001", "2004/2005", "2009/2010", "2014/2015", "2019/2020", "2023/2024")
 team_stats_focus <- team_stats |>
   filter(Season %in% seasons_focus) |>
   mutate(
@@ -1037,127 +968,50 @@ team_stats_scaled <- team_stats_focus |>
     shots_on_target_against_s = rescale(shots_on_target_against)
   )
 
-GGally::ggparcoord(
-  data        = team_stats_scaled,
-  columns     = match(
-    c("goals_for_s",
-      "shots_on_target_for_s",
-      "goals_against_s",
-      "shots_on_target_against_s"),
-    names(team_stats_scaled)
-  ),
-  groupColumn = "Season",
-  scale       = "globalminmax", 
-  alphaLines  = 0.6,
-  showPoints  = TRUE
-) +
-  scale_x_discrete(
-    labels = c(
-      "goals_for_s" = "Goals For",
-      "shots_on_target_for_s" = "Shots on Target For",
-      "goals_against_s" = "Goals Against",
-      "shots_on_target_against_s" = "Shots on Target Against"
-    )
-  ) +
-  labs(
-    title = "Team Profiles Across Seasons — Premier League",
-    subtitle = "Metrics rescaled to [0,1] for seasons 2000/2001, 2009/2010 and 2023/2024",
-    x = "Metric",
-    y = "Scaled value"
-  ) +
-  theme_minimal(base_size = 11) +
-  theme(
-    plot.title = element_text(size = 14, face = "bold"),
-    legend.position = "bottom"
-  )
-
-```
-## Second option
-Gráfica interactiva
-```{r}
-
-library(plotly)
-
-seasons_focus <- c("2000/2001", "2009/2010", "2023/2024")
-team_stats_focus <- team_stats |>
-  filter(Season %in% seasons_focus) |>
-  mutate(
-    Season = factor(Season, levels = seasons_focus)
-  )
-
-team_stats_scaled <- team_stats_focus |>
-  mutate(
-    goals_for_s               = rescale(goals_for),
-    shots_on_target_for_s     = rescale(shots_on_target_for),
-    goals_against_s           = rescale(goals_against),
-    shots_on_target_against_s = rescale(shots_on_target_against)
-  )
 
 p <- GGally::ggparcoord(
   data        = team_stats_scaled,
-  columns     = match(
-    c("goals_for_s",
-      "shots_on_target_for_s",
-      "goals_against_s",
-      "shots_on_target_against_s"),
-    names(team_stats_scaled)
-  ),
+  columns     = match(c("goals_for_s", "shots_on_target_for_s", "goals_against_s", "shots_on_target_against_s"), names(team_stats_scaled)),
   groupColumn = "Season",
   scale       = "globalminmax", 
   alphaLines  = 0.6,
   showPoints  = TRUE
 ) +
-  scale_x_discrete(
-    labels = c(
-      "goals_for_s" = "Goals For",
-      "shots_on_target_for_s" = "Shots on Target For",
-      "goals_against_s" = "Goals Against",
-      "shots_on_target_against_s" = "Shots on Target Against"
-    )
-  ) +
-  labs(
-    title = "Team Profiles Across Seasons — Premier League",
-    subtitle = "Click buttons to filter by season",
-    x = "Metric",
-    y = "Scaled value"
-  ) +
+  scale_x_discrete(labels = c(
+    "goals_for_s" = "Goals For",
+    "shots_on_target_for_s" = "SoT For",
+    "goals_against_s" = "Goals Against",
+    "shots_on_target_against_s" = "SoT Against"
+  )) +
+  labs(title = "Team Profiles Across Seasons", x = "Metric", y = "Scaled Value") +
   theme_minimal(base_size = 11) +
-  theme(
-    plot.title = element_text(size = 14, face = "bold"),
-    legend.position = "bottom"
-  )
+  theme(legend.position = "bottom")
 
-ggplotly(p) |>
+
+p$data$TeamName <- team_stats_scaled$Team[p$data$.ID]
+
+# Update the tooltip text
+p <- p + aes(text = paste0(
+  "<b>", TeamName, "</b>",
+  "<br>Season: ", Season,
+  "<br>Metric: ", variable,
+  "<br>Value: ", round(value, 2)
+))
+
+
+ggplotly(p, tooltip = "text") |>
   layout(
     updatemenus = list(
       list(
-        type = "buttons",
-        direction = "right",
-        xanchor = "center",
-        yanchor = "bottom",  # Cambié de "top" a "bottom"
-        x = 0.5,
-        y = -0.15,           # Cambié de 1.15 a -0.15 (negativo para ponerlo abajo)
+        type = "buttons", direction = "right", xanchor = "center", yanchor = "bottom", x = 0.5, y = -0.15,        
         buttons = list(
-          list(
-            method = "restyle",
-            args = list("visible", list(TRUE, TRUE, TRUE)),
-            label = "All Seasons"
-          ),
-          list(
-            method = "restyle",
-            args = list("visible", list(TRUE, FALSE, FALSE)),
-            label = "2000/2001"
-          ),
-          list(
-            method = "restyle",
-            args = list("visible", list(FALSE, TRUE, FALSE)),
-            label = "2009/2010"
-          ),
-          list(
-            method = "restyle",
-            args = list("visible", list(FALSE, FALSE, TRUE)),
-            label = "2023/2024"
-          )
+          list(method = "restyle", args = list("visible", list(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)), label = "All"),
+          list(method = "restyle", args = list("visible", list(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)), label = "2000/01"),
+          list(method = "restyle", args = list("visible", list(FALSE, TRUE, FALSE, FALSE, FALSE, FALSE)), label = "2004/05"),
+          list(method = "restyle", args = list("visible", list(FALSE, FALSE, TRUE, FALSE, FALSE, FALSE)), label = "2009/10"),
+          list(method = "restyle", args = list("visible", list(FALSE, FALSE, FALSE, TRUE, FALSE, FALSE)), label = "2014/15"),
+          list(method = "restyle", args = list("visible", list(FALSE, FALSE, FALSE, FALSE, TRUE, FALSE)), label = "2019/20"),
+          list(method = "restyle", args = list("visible", list(FALSE, FALSE, FALSE, FALSE, FALSE, TRUE)), label = "2023/24")
         )
       )
     )
@@ -1165,246 +1019,6 @@ ggplotly(p) |>
 ```
 
 Across teams, we observe strong positive associations between shots on target and goals scored, as well as between shots on target conceded and goals conceded. However, shots on target generated by a team no meaningful relationship with the goals it concedes, suggesting that offensive productivity and defensive vulneratiblity operate independently.
-## Relation among categorical variables
-
-We want to analyze the existing categorical data and create additional categorical variables to better understand the relationships between team results and certain classifications. We would also like to explore the behavior of different teams, for example, how many home teams that were losing a match ended up winning it, or which leagues are more "home-biased" (meaning that home teams win most of the matches).
-
-To do. Clean up a bit
-
-```{r}
-Data_England_Time=Data_England |>
-  filter(is.na(Time)==F)
-# Convert Time to proper time format
-
-Data_England_Time$Time <- as.POSIXct(Data_England_Time$Time, format = "%H:%M:%S")
-
-# Extract hour for grouping
-Data_England_Time$Hour <- as.numeric(format(Data_England_Time$Time, "%H"))
-Data_England_Time$Minute <- as.numeric(format(Data_England_Time$Time, "%M"))
-# Convert Date to proper format and extract day of week
-Data_England_Time$Date <- as.Date(Data_England_Time$Date)
-Data_England_Time$DayOfWeek <- weekdays(Data_England_Time$Date)
-Data_England_Time$IsWeekend <- Data_England_Time$DayOfWeek %in% c("Saturday", "Sunday")
-
-
-
-
-# Extract hour from Time column
-Data_England$Hour <- as.numeric(format(as.POSIXct(Data_England$Time, format = "%H:%M:%S"), "%H"))
-
-sort(unique(Data_England_Time$Hour))
-
-# Basic histogram
-ggplot(Data_England_Time, aes(x = Hour)) +
-  geom_bar() +
-  labs(
-    title = "Distribution of Match Starting Times",
-    subtitle = "Histogram of kick-off hours",
-    x = "Starting Hour",
-    y = "Number of Matches"
-  ) +
-  theme_minimal()
-
-
-# Create time categories
-Data_England_Time$Time_Category <- cut(Data_England_Time$Hour,
-                              breaks = c(0, 14, 18, 21),
-                              labels = c("Morning", "Afternoon", "Evening"),
-                              include.lowest = TRUE)
-
-# Analyze match outcomes by time of day
-time_analysis <- Data_England_Time %>%
-  group_by(Time_Category) %>%
-  summarise(
-    Total_Matches = n(),
-    Home_Wins = sum(FTR == "H", na.rm = TRUE),
-    Away_Wins = sum(FTR == "A", na.rm = TRUE),
-    Draws = sum(FTR == "D", na.rm = TRUE)
-  )
-
-# Goals scored by time of day
-goals_by_time <- Data_England_Time %>%
-  group_by(Hour) %>%
-  summarise(
-    Avg_Home_Goals = mean(FTHG, na.rm = TRUE),
-    Avg_Away_Goals = mean(FTAG, na.rm = TRUE),
-    Total_Goals=mean(FTHG+FTAG,na.rm=TRUE),
-    Matches = n()
-  )
-
-# Discipline by time
-cards_by_time <- Data_England_Time %>%
-  group_by(Hour) %>%
-  summarise(
-    Avg_Yellow_Cards = mean(HY + AY, na.rm = TRUE),
-    Avg_Red_Cards = mean(HR + AR, na.rm = TRUE)
-  )
-
-
-
-# Combine with time analysis
-weekend_time_analysis <- Data_England_Time %>%
-  group_by(IsWeekend, Time_Category) %>%
-  summarise(
-    Matches = n(),
-    Avg_Goals = mean(FTHG + FTAG, na.rm = TRUE),
-    Home_Win_Rate = mean(FTR == "H", na.rm = TRUE)
-  )
-
-
-# Home team performance by kick-off time
-home_team_time <- Data_England_Time %>%
-  group_by(HomeTeam, Time_Category) %>%
-  summarise(
-    Matches = n(),
-    Wins = sum(FTR == "H"),
-    Goals_Scored = mean(FTHG),
-    Goals_Conceded = mean(FTAG),
-    Win_Rate = mean(FTR == "H")
-  ) %>%
-  arrange(desc(Win_Rate))
-
-# Away team performance by kick-off time
-away_team_time <- Data_England_Time %>%
-  group_by(AwayTeam, Time_Category) %>%
-  summarise(
-    Matches = n(),
-    Wins = sum(FTR == "A"),
-    Goals_Scored = mean(FTAG),
-    Goals_Conceded = mean(FTHG),
-    Win_Rate = mean(FTR == "A")
-  )
-
-
-# Goals by hour of day
-ggplot(goals_by_time, aes(x = Hour, y = Total_Goals)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Average Goals by Kick-off Time", 
-       x = "Hour of Day", y = "Average Goals per Match")
-
-# Match outcomes by time category
-ggplot(time_analysis, aes(x = Time_Category, y = Home_Wins/Total_Matches)) +
-  geom_col() +
-  labs(title = "Home Win Rate by Time of Day", 
-       x = "Time Category", y = "Home Win Rate")
-
-
-# Create goal difference categories
-Data_England_Time$Goal_Diff <- Data_England_Time$FTHG - Data_England_Time$FTAG
-Data_England_Time$Result_Type <- ifelse(Data_England_Time$Goal_Diff > 2, "Big Home Win",
-                               ifelse(Data_England_Time$Goal_Diff > 0, "Close Home Win",
-                                      ifelse(Data_England_Time$Goal_Diff == 0, "Draw",
-                                             ifelse(Data_England_Time$Goal_Diff < -2, "Big Away Win", "Close Away Win"))))
-
-mosaicplot(~ Time_Category + Result_Type, data = Data_England_Time,
-           main = "Match Types by Time of Day",
-           xlab = "Time Category", 
-           ylab = "Result Type",
-           color = c("darkred", "red", "gray", "blue", "darkblue"))
-
-
-# For more complex relationships (using vcd package)
-# Extract day of week
-Data_England_Time$DayOfWeek <- weekdays(as.Date(Data_England_Time$Date))
-Data_England_Time$DayType <- ifelse(Data_England_Time$DayOfWeek %in% c("Saturday", "Sunday"), 
-                           "Weekend", "Weekday")
-
-mosaicplot(~ Time_Category + DayType, data = Data_England_Time,
-           main = "Match Results: Weekend vs Weekday",
-           xlab = "Day Type", 
-           ylab = "Full Time Result",
-           color = c("#FF6B6B", "#4ECDC4", "#45B7D1"))
-
-
-
-# Result by Time and Day Type
-structable(FTR ~ Time_Category + DayType+Div, data = Data_England_Time)
-mosaic(~ Time_Category + DayType +Div+ FTR, data = Data_England_Time,
-       main = "Results by Time and Day Type",
-       labeling_args = list(rot_labels = c(20, 0, 0, 0)),
-       highlighting = "FTR",
-       highlighting_fill = c("red", "gray", "blue"))
-
-
-# Simple binary/categorical versions of your variables
-# Similar to the (No/Yes) format in your image
-
-# Create binary variables from your data
-Data_England_Time$High_Goals <- ifelse(Data_England_Time$FTHG + Data_England_Time$FTAG > 2.5, "Yes", "No")
-Data_England_Time$Home_Advantage <- ifelse(Data_England_Time$FTHG > Data_England_Time$FTAG, "Yes", "No")
-Data_England_Time$Many_Cards <- ifelse(Data_England_Time$HY + Data_England_Time$AY > 3.5, "Yes", "No")
-Data_England_Time$Many_Shots <- ifelse(Data_England_Time$HS + Data_England_Time$AS > 25, "Yes", "No")
-Data_England_Time$Weekend <- ifelse(weekdays(as.Date(Data_England_Time$Date)) %in% c("Saturday", "Sunday"), "Yes", "No")
-
-
-# Simple 2x2 mosaic plot
-mosaicplot(~ Home_Advantage + Weekend, data = Data_England_Time,
-           main = "Home Wins vs Weekend Matches",
-           xlab = "Home Win", 
-           ylab = "Weekend Match",
-           color = c("lightblue", "salmon"))
-
-# Create a structured plot similar to your image
-par(mfrow = c(2, 2))  # 2x2 grid of plots
-
-# Plot 1: Goals vs Weekend
-mosaicplot(~ High_Goals + Weekend, data = Data_England_Time,
-           main = "High Scoring vs Weekend",
-           color = c("#E7B800", "#2E9FDF"))
-
-# Plot 2: Cards vs Home Advantage
-mosaicplot(~ Many_Cards + Home_Advantage, data = Data_England_Time,
-           main = "Many Cards vs Home Wins",
-           color = c("#E7B800", "#2E9FDF"))
-
-# Plot 3: Shots vs Home Advantage
-mosaicplot(~ Many_Shots + Home_Advantage, data = Data_England_Time,
-           main = "Many Shots vs Home Wins",
-           color = c("#E7B800", "#2E9FDF"))
-
-# Plot 4: Goals vs Many Cards
-mosaicplot(~ High_Goals + Many_Cards, data = Data_England_Time,
-           main = "High Scoring vs Many Cards",
-           color = c("#E7B800", "#2E9FDF"))
-
-par(mfrow = c(1, 1))  # Reset plot layout
-
-
-# Convert time to binary categories
-Data_England_Time$Prime_Time <- ifelse(Data_England_Time$Hour %in% c(17, 18, 19, 20), "Yes", "No")
-Data_England_Time$Afternoon <- ifelse(Data_England_Time$Hour %in% c(12, 13, 14, 15), "Yes", "No")
-
-# Create mosaic plots with time variables
-mosaicplot(~ Home_Advantage + Prime_Time, data = Data_England_Time,
-           main = "Home Wins vs Prime Time Matches",
-           xlab = "Home Win", 
-           ylab = "Prime Time (5-8 PM)",
-           color = c("lightgreen", "orange"))
-
-mosaicplot(~ High_Goals + Afternoon, data = Data_England_Time,
-           main = "High Scoring vs Afternoon Matches",
-           xlab = "High Goals (>2.5)", 
-           ylab = "Afternoon Match",
-           color = c("lightblue", "pink"))
-
-
-
-# More polished version similar to academic papers
-mosaic(~Prime_Time+Home_Advantage + Weekend + Many_Cards, 
-       data = Data_England_Time,
-       main = "Football Match Analysis",
-       labeling_args = list(
-         set_varnames = c(Home_Advantage = "Home Win", 
-                          Weekend = "Weekend Match", 
-                          Many_Cards = "High Cards"),
-         rot_labels = c(20, 0, 0, 0)
-       ),
-       highlighting = "Home_Advantage",
-       highlighting_fill = c("lightblue", "coral"))
-
-###
-```
 
 ## Detection of clusters
 
@@ -1414,9 +1028,9 @@ We know that many of the numerical variables in our dataset are related, so with
 # Create team-level aggregated data
 most_recent_season <- max(Data_England$Season, na.rm = TRUE)
 
-current_tier1_teams <- Data_England %>%
-  filter(Div == "E0" & Season ==most_recent_season ) %>%
-  distinct(HomeTeam) %>%
+current_tier1_teams <- Data_England |>
+  filter(Div == "E0" & Season ==most_recent_season ) |>
+  distinct(HomeTeam) |>
   pull(HomeTeam)
 
 
@@ -1493,10 +1107,10 @@ team_performance=team_performance |>
   filter(Team %in% current_tier1_teams) 
 # Select numeric variables for PCA
 
-team_performance <- team_performance %>%
+team_performance <- team_performance |>
   mutate(across(where(is.numeric), ~ ifelse(is.nan(.), 0, .)))
 
-team_performance <- team_performance %>%
+team_performance <- team_performance |>
   mutate_if(is.numeric, ~ifelse(is.infinite(.), 0, .))
 
 
@@ -1530,149 +1144,14 @@ fviz_pca_biplot(pca_result,
 To Do: Explain PCA
 
 
-## Tier dynamics
-
-```{r}
-
-Data_England_Matches=Data_England |>
-  group_by(Season, Div) |>
-  summarise(count=n(),
-            teams=n_distinct(HomeTeam))
 
 
 
-x=Data_England |>
-  filter(is.na(Tier)==T)
-
-# Get unique teams and their tiers by season
-team_timeline <- Data_England %>%
-  select(Season, HomeTeam, Tier, League) %>%
-  rename(Team = HomeTeam) %>%
-  bind_rows(
-    Data_England %>%
-      select(Season, AwayTeam, Tier, League) %>%
-      rename(Team = AwayTeam)
-  ) %>%
-  distinct(Season, Team, Tier, League) %>%
-  arrange(Team, Season)
-
-Teams=Data_England |>
-  group_by(HomeTeam) |>
-  summarise(conteo=n(),
-            divs=n_distinct(Tier))
-
-Teams=Teams |>
-  filter(divs>=4)
-
-selected_teams=unique(Teams$HomeTeam)
-
-teams_timeline <- team_timeline %>%
-  filter(Team %in% Teams$HomeTeam) %>%
-  complete(Season = unique(team_timeline$Season), Team = selected_teams) %>%
-  group_by(Team) %>%
-  fill(Tier, League, .direction = "downup")
-
-
-current_tiers <- teams_timeline %>%
-  group_by(Team) %>%
-  filter(Season == max(Season)) %>%
-  select(Team, Current_Tier = Tier)
-
-teams_timeline <- teams_timeline %>%
-  left_join(current_tiers, by = "Team")
 
 
 
-# Facet wrap - each team gets its own panel
-teams_timeline <- team_timeline %>%
-  filter(Team %in% selected_teams) %>%
-  complete(Season = unique(team_timeline$Season), Team) %>%
-  group_by(Team) %>%
-  fill(Tier, League, .direction = "down") %>%
-  filter(!is.na(Tier))
-
-ggplot(teams_timeline, aes(x = Season, y = Tier, group = Team)) +
-  geom_line(color = "steelblue", linewidth = 1.2) +
-  geom_point(color = "darkblue", size = 2) +
-  scale_y_discrete(limits=rev) +
-  facet_wrap(~ Team, ncol = 4) +  # 4 columns, 5 rows for 17 teams
-  labs(
-    title = "Team Performance Timelines (1993-2024)",
-    x = "Season",
-    y = "Tier"
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
-    axis.text.y = element_text(size = 8),
-    strip.text = element_text(face = "bold", size = 9),
-    panel.spacing = unit(1, "lines")
-  )
 
 
-```
-
-
-
-## Seasonal trends
-
-```{r}
-library(tidyverse)
-library(lubridate)
-
-# 1. Prepare Data
-goals_monthly <- Data_England %>%
-  mutate(MatchDate = lubridate::dmy(Date),                # Convert string to Date
-         Month = lubridate::month(MatchDate, label = TRUE, abbr = TRUE)) %>%
-  # Filter out rare off-season games (June/July)
-  filter(!Month %in% c("Jun", "Jul")) %>%
-  # Reorder months to follow the Football Season (Aug -> May)
-  mutate(Month = factor(Month, levels = c("Aug", "Sep", "Oct", "Nov", "Dec", 
-                                          "Jan", "Feb", "Mar", "Apr", "May"))) %>%
-  group_by(Month, League) %>%
-  summarise(AvgGoals = mean(FTHG + FTAG, na.rm = TRUE), .groups = "drop")
-
-# 2. Plot
-ggplot(goals_monthly, aes(x = Month, y = AvgGoals, group = League, color = League)) +
-  geom_line(size = 1.2) +
-  geom_point(size = 3) +
-  labs(
-    title = "End of Season Madness?",
-    subtitle = "Average Goals per Game by Month",
-    y = "Avg Total Goals",
-    x = "Month of Season"
-  ) +
-  theme_minimal()
-
-```
-
-
-```{r}
-# 1. Prepare Data
-cards_monthly <- Data_England %>%
-  filter(Season >= 2000) %>% # Filter for reliable card data
-  mutate(MatchDate = lubridate::dmy(Date),
-         Month = lubridate::month(MatchDate, label = TRUE, abbr = TRUE)) %>%
-  filter(!Month %in% c("Jun", "Jul")) %>%
-  mutate(Month = factor(Month, levels = c("Aug", "Sep", "Oct", "Nov", "Dec", 
-                                          "Jan", "Feb", "Mar", "Apr", "May"))) %>%
-  group_by(Month, Season) %>%
-  summarise(AvgCards = mean(HY + AY + HR + AR, na.rm = TRUE))
-
-# 2. Plot
-ggplot(cards_monthly, aes(x = Month, y = AvgCards)) +
-  geom_col(fill = "#FF4B4B", alpha = 0.8) +
-  facet_wrap(~Season)+
-  labs(
-    title = "The Winter Grind: Discipline by Month",
-    subtitle = "Average Cards (Yellow + Red) per match",
-    y = "Cards per Match",
-    x = NULL
-  ) +
-  coord_cartesian(ylim = c(2.5, 4)) + # Zoom in to see differences
-  theme_minimal()
-
-```
 
 
 ```{r}
@@ -1684,18 +1163,18 @@ library(ggplot2)
 big6 <- c("Liverpool", "Chelsea", "Arsenal",
           "Man City", "Man United", "Tottenham")
 
-df_big6 <- Data_England %>%
+df_big6 <- Data_England |>
   select(HomeTeam, AwayTeam, Date, FTR)|>
   mutate(
     Date = lubridate::dmy(Date),
     Month = lubridate::month(Date, label = TRUE)
-  )%>%
+  )|>
   pivot_longer(
     c(HomeTeam, AwayTeam),
     names_to = "HA",
     values_to = "Team"
-  ) %>%
-  filter(Team %in% current_tier1_teams & (!Team %in% big6)) %>%
+  ) |>
+  filter(Team %in% big6) |>
   mutate(
     Team_Result = case_when(
       FTR == "D" ~ "Draw",
@@ -1707,12 +1186,12 @@ df_big6 <- Data_England %>%
     )
   )
 
-df_big6_prop <- df_big6 %>%
-  count(Team, Month, Team_Result) %>%
-  group_by(Team, Month) %>%
+df_big6_prop <- df_big6 |>
+  count(Team, Month, Team_Result) |>
+  group_by(Team, Month) |>
   mutate(prop = n / sum(n))
 
-df_big6_prop=df_big6_prop |>filter(!Month %in% c("Jun", "Jul")) %>%
+df_big6_prop=df_big6_prop |>filter(!Month %in% c("Jun", "Jul")) |>
   mutate(Month = factor(Month, levels = c("Aug", "Sep", "Oct", "Nov", "Dec", 
                                           "Jan", "Feb", "Mar", "Apr", "May"))) 
 
@@ -1755,11 +1234,11 @@ To Do: Decide which one to get
 
 library(tidyverse)
 
-df_clean <- Data_England %>%
-  mutate(Referee_Clean = Referee) %>%
+df_clean <- Data_England |>
+  mutate(Referee_Clean = Referee) |>
   
   # 1. Remove dots explicitly first (e.g., "P. Walker" -> "P Walker")
-  mutate(Referee_Clean = str_remove_all(Referee_Clean, "\\.")) %>%
+  mutate(Referee_Clean = str_remove_all(Referee_Clean, "\\.")) |>
   
   # 2. Handle the "Lastname, Firstname" format (e.g., "Yates, N" -> "N Yates")
   # Regex explanation:
@@ -1767,13 +1246,13 @@ df_clean <- Data_England %>%
   # \s* -> Match any spaces after comma
   # (.*)$       -> Capture everything after (Firstname/Initial)
   # \\2 \\1     -> Swap them (Firstname Surname)
-  mutate(Referee_Clean = str_replace(Referee_Clean, "^(.*),\\s*(.*)$", "\\2 \\1")) %>%
+  mutate(Referee_Clean = str_replace(Referee_Clean, "^(.*),\\s*(.*)$", "\\2 \\1")) |>
   
   # 3. Trim extra whitespace created by the swap
-  mutate(Referee_Clean = str_squish(Referee_Clean)) %>%
+  mutate(Referee_Clean = str_squish(Referee_Clean)) |>
   
   # 4. Force to Title Case (e.g., "n yates" -> "N Yates")
-  mutate(Referee_Clean = str_to_title(Referee_Clean)) %>%
+  mutate(Referee_Clean = str_to_title(Referee_Clean)) |>
 
   # 5. Convert EVERYONE to "Initial Surname" format
   # Regex explanation:
@@ -1786,8 +1265,8 @@ df_clean <- Data_England %>%
 
 # --- Check the results ---
 # This will show you the original vs the cleaned version
-check_data <- df_clean %>% 
-  group_by(Referee, Referee_Final) %>% 
+check_data <- df_clean |> 
+  group_by(Referee, Referee_Final) |> 
   summarise(conteo=n())
 
 Data_England_Referee=df_clean |>
@@ -1813,10 +1292,10 @@ Referees=Data_England_Referee |>
 Referees=Referees |>
   filter(Count_matches>=15)
 
-Referees %>%
-  arrange(desc(Count_matches)) %>%
-  slice_head(n = 30) %>%                 # top 30
-  mutate(Referee = fct_reorder(Referee, Count_matches)) %>%
+Referees |>
+  arrange(desc(Count_matches)) |>
+  slice_head(n = 30) |>                 # top 30
+  mutate(Referee = fct_reorder(Referee, Count_matches)) |>
   ggplot(aes(x = Referee, y = Count_matches)) +
   geom_segment(aes(xend = Referee, yend = 0), color = "grey70") +
   geom_point(size = 3, color = "darkgreen") +
@@ -1828,11 +1307,11 @@ Referees %>%
   ) +
   theme_minimal()
 
-Referees %>%
+Referees |>
   mutate(
     home_win_rate = Home_wins_count / Count_matches,
     away_win_rate = Away_wins_count / Count_matches
-  ) %>%
+  ) |>
   ggplot(aes(x = home_win_rate, y = away_win_rate, fill = Count_matches)) +
   geom_point(alpha = 0.7, color = "steelblue") +
   
@@ -1845,10 +1324,10 @@ Referees %>%
   theme_minimal()
 
 
-Referees %>%
+Referees |>
   mutate(
     home_win_rate = Home_wins_count / Count_matches
-  ) %>%
+  ) |>
   ggplot(aes(x = Count_matches, y = home_win_rate)) +
   geom_point(alpha = 0.3, color = "darkblue") +
   scale_y_log10()+
