@@ -160,7 +160,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./results.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Enlglish football through the years</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Results</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -181,11 +181,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#description" id="toc-description" class="nav-link active" data-scroll-target="#description"><span class="header-section-number">2.1</span> Description</a></li>
   <li><a href="#data-collection" id="toc-data-collection" class="nav-link" data-scroll-target="#data-collection"><span class="header-section-number">2.2</span> Data Collection</a></li>
-  <li><a href="#mising-values" id="toc-mising-values" class="nav-link" data-scroll-target="#mising-values"><span class="header-section-number">2.3</span> Mising Values</a>
-  <ul class="collapse">
-  <li><a href="#outliers" id="toc-outliers" class="nav-link" data-scroll-target="#outliers"><span class="header-section-number">2.3.1</span> Outliers</a></li>
-  </ul></li>
-  <li><a href="#expand-to-learn-about-column-names" id="toc-expand-to-learn-about-column-names" class="nav-link" data-scroll-target="#expand-to-learn-about-column-names"><span class="header-section-number">2.4</span> Expand To Learn About Column Names</a></li>
+  <li><a href="#mising-values" id="toc-mising-values" class="nav-link" data-scroll-target="#mising-values"><span class="header-section-number">2.3</span> Mising Values</a></li>
+  <li><a href="#outliers" id="toc-outliers" class="nav-link" data-scroll-target="#outliers"><span class="header-section-number">2.4</span> Outliers</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/luisgomezordoniez/football-soccer/edit/main/data.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/luisgomezordoniez/football-soccer/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -387,8 +384,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<section id="outliers" class="level3" data-number="2.3.1">
-<h3 data-number="2.3.1" class="anchored" data-anchor-id="outliers"><span class="header-section-number">2.3.1</span> Outliers</h3>
+</section>
+<section id="outliers" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="outliers"><span class="header-section-number">2.4</span> Outliers</h2>
 <p>The heatmap compares how often different outlier-detection methods flag extreme values in each match variable. Across most variables, all three methods identify very few outliers, indicating generally well‑behaved distributions. In contrast, red‑card variables (HR, AR) and, to a lesser extent, full‑time home goals (FTHG) show much higher outlier percentages, especially under the IQR method, revealing heavy tails or rare extreme events, which is reasonable since its not common to have a game with a lot of goals or red cards.</p>
 <div class="cell">
 <details class="code-fold">
@@ -503,14 +501,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">9</span>, <span class="at">by =</span> <span class="dv">1</span>))<span class="sc">+</span></span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="fu">paste</span>(<span class="st">"Distribution of:"</span>, col),</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="fu">paste</span>(<span class="st">"Distribution of"</span>, col),</span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">subtitle =</span> <span class="st">"Red dashed lines = 5th &amp; 95th percentiles"</span>,</span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> col,</span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="st">"Number of games"</span></span>
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_density_outliers</span>(Data_England, <span class="st">"HR"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_density_outliers</span>(Data_England, <span class="st">"FTHG"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -521,7 +519,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_density_outliers</span>(Data_England, <span class="st">"AR"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_density_outliers</span>(Data_England, <span class="st">"HR"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -532,7 +530,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_density_outliers</span>(Data_England, <span class="st">"FTHG"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_density_outliers</span>(Data_England, <span class="st">"AR"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -542,11 +540,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-</section>
-</section>
-<section id="expand-to-learn-about-column-names" class="level2 callout-notes" data-collapse="true" data-number="2.4">
-<h2 data-number="2.4" class="anchored" data-anchor-id="expand-to-learn-about-column-names"><span class="header-section-number">2.4</span> Expand To Learn About Column Names</h2>
-<p>The column names of our data set are not very informative. We decided to include them here in case the reader find them hard to understand.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note about variable names
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The column names of our dataset are not very informative. We decided to include them here in case the description is useful.</p>
 <ul>
 <li>Div = League Division</li>
 <li>Date = Match Date (dd/mm/yy)</li>
@@ -559,18 +565,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>HTHG = Half Time Home Team Goals</li>
 <li>HTAG = Half Time Away Team Goals</li>
 <li>HTR = Half Time Result (H=Home Win, D=Draw, A=Away Win)</li>
-</ul>
-<p>Match Statistics (where available)</p>
-<ul>
 <li>Referee = Match Referee</li>
 <li>HS = Home Team Shots</li>
 <li>AS = Away Team Shots</li>
 <li>HST = Home Team Shots on Target</li>
 <li>AST = Away Team Shots on Target</li>
-<li>HHW = Home Team Hit Woodwork</li>
-<li>AHW = Away Team Hit Woodwork</li>
-<li>HC = Home Team Corners</li>
-<li>AC = Away Team Corners</li>
 <li>HF = Home Team Fouls Committed</li>
 <li>AF = Away Team Fouls Committed</li>
 <li>HY = Home Team Yellow Cards</li>
@@ -578,9 +577,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>HR = Home Team Red Cards</li>
 <li>AR = Away Team Red Cards</li>
 </ul>
+</div>
+</div>
+</div>
+
+
 </section>
-
-
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -989,8 +991,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./results.html" class="pagination-link" aria-label="Enlglish football through the years">
-        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Enlglish football through the years</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./results.html" class="pagination-link" aria-label="Results">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Results</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

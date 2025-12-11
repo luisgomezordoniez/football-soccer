@@ -181,7 +181,7 @@ ggplot(missing_summary, aes(x = variable, y = Season, fill = prop_missing)) +
 
 
 
-### Outliers
+## Outliers
 
 The heatmap compares how often different outlier-detection methods flag extreme values in each match variable. Across most variables, all three methods identify very few outliers, indicating generally well‑behaved distributions. In contrast, red‑card variables (HR, AR) and, to a lesser extent, full‑time home goals (FTHG) show much higher outlier percentages, especially under the IQR method, revealing heavy tails or rare extreme events, which is reasonable since its not common to have a game with a lot of goals or red cards.
 
@@ -291,22 +291,26 @@ plot_density_outliers <- function(df, col) {
     scale_x_continuous(breaks = seq(0, 9, by = 1))+
     theme_minimal(base_size = 13) +
     labs(
-      title = paste("Distribution of:", col),
+      title = paste("Distribution of", col),
       subtitle = "Red dashed lines = 5th & 95th percentiles",
       x = col,
       y = "Number of games"
     )
 }
 
+plot_density_outliers(Data_England, "FTHG")
 plot_density_outliers(Data_England, "HR")
 plot_density_outliers(Data_England, "AR")
-plot_density_outliers(Data_England, "FTHG")
+
 ```
 
-::: {.callout-notes collapse="true"}
-## Expand To Learn About Column Names
 
-The column names of our data set are not very informative. We decided to include them here in case the reader find them hard to understand.
+::: {.callout-note collapse="true"}
+
+## Note about variable names
+
+The column names of our dataset are not very informative. We decided to include them here in case the description is useful.
+
 
 - Div = League Division
 - Date = Match Date (dd/mm/yy)
@@ -319,18 +323,11 @@ The column names of our data set are not very informative. We decided to include
 - HTHG = Half Time Home Team Goals
 - HTAG = Half Time Away Team Goals
 - HTR = Half Time Result (H=Home Win, D=Draw, A=Away Win)
-
-Match Statistics (where available)
-
 - Referee = Match Referee
 - HS = Home Team Shots
 - AS = Away Team Shots
 - HST = Home Team Shots on Target
 - AST = Away Team Shots on Target
-- HHW = Home Team Hit Woodwork
-- AHW = Away Team Hit Woodwork
-- HC = Home Team Corners
-- AC = Away Team Corners
 - HF = Home Team Fouls Committed
 - AF = Away Team Fouls Committed
 - HY = Home Team Yellow Cards
