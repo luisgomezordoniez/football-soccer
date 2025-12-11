@@ -1305,3 +1305,4 @@ ggplot(cards_result_band,
 ```
 
 This graph shows the joint distribution between card intensity and full-time result of a match. For all levels of card intensity, most matches are won by the home team. Nevertheless, this home advantage decreases as card intensity rises: home wins drop from 52% in low-card matches (0-1 cards) to 44% in high-card matches (6+ cards). On the other hand, away wins remain practically constant at 28% across all bands, suggesting that this result is not affected by card intensity. Draws also increase along with card intensity, rising from 20% to 28%.
+

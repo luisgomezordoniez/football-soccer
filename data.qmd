@@ -5,9 +5,9 @@ This project uses publicly available match-level data provided by Football-Data.
 ## Description
 
 
-For the purposes of this study, only data from English football competitions were used. These include the Premier League, Championship, League One, League Two, and, when available, the National League. The dataset covers more than two decades of competitive play, with full-time and half-time results available back to the 1993/94 season and detailed match statistics widely available from the 2000/01 season onward.
+For the purposes of this study, only data from English football competitions were used. These include the Premier League (Tier 1), Championship (Tier 2), League One (Tier 3) and League Two (Tier4). The dataset covers more than two decades of competitive play, with full-time and half-time results available back to the 1993/94 season and detailed match statistics widely available from the 2000/01 season onward.
 
-The variables utilized in this project relate exclusively to match outcomes and in-game performance metrics. These include goals scored, half-time results, shots, shots on target, corners, fouls, offsides, disciplinary actions, and referee information. Historical bookmaker odds—also included in the original files—were intentionally excluded, as the analysis focuses on sporting performance rather than betting markets.
+The variables utilized in this project relate exclusively to match outcomes and in-game performance metrics. These include goals scored, half-time results, shots, shots on target, corners, fouls, disciplinary actions, and referee information. Historical bookmaker odds—also included in the original files—were intentionally excluded, as the analysis focuses on sporting performance rather than betting markets.
 
 Football-Data.co.uk aggregates information from multiple official and media-based match reporting services to ensure accuracy and completeness. Data are updated on a rolling basis throughout each season and are archived annually, enabling consistent longitudinal analysis across leagues and time periods.
 
@@ -26,6 +26,15 @@ library(dplyr)
 library(forcats)
 library(ggplot2)
 library(redav)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(tidyr)
+library(ggalluvial)
+library(lubridate)
+library(GGally)
+library(scales)   # para rescale()
+library(vcd)
 
 not_all_na <- function(x) any(!is.na(x))
 year_end = 2025
@@ -62,17 +71,17 @@ query <- function(league, start = 1993, end = year_end) {
         
         df <- read_csv(url, show_col_types = FALSE)
         
-        df <- df %>% 
-          select(any_of(keep_cols)) %>% 
+        df <- df |> 
+          select(any_of(keep_cols)) |> 
           select_if(not_all_na)
         
         # fix old Home/Away formats
         if ("Home" %in% names(df)) {
-          df <- df %>% rename(HomeTeam = Home, AwayTeam = Away)
+          df <- df |> rename(HomeTeam = Home, AwayTeam = Away)
         }
         
-        df <- df %>%
-          mutate(Season = season) %>%
+        df <- df |>
+          mutate(Season = season) |>
           mutate(across(everything(), as.character))
         
         message("Loaded season: ", season)
@@ -116,11 +125,6 @@ Data_England =Data_England |>
 
 Data_England$League <- factor(Data_England$League, levels =c("Premier League", "Championship","League One", "League Two"), ordered = TRUE)
 
-My_Data_England=Data_England |>
-  group_by(Div, Season) |>
-  summarise(count=n())
-
-
 my_custom_theme <- function() {
   theme_classic(base_size = 12) + # Start with a built-in theme as a base
     theme(
@@ -132,6 +136,9 @@ my_custom_theme <- function() {
     )
 }
 
+Data_England=Data_England |>
+  mutate(Year=substr(Season, 6,10))
+
 ```
 
 ## Mising Values 
@@ -139,30 +146,18 @@ my_custom_theme <- function() {
 
 We can identify three distinct tiers of data completeness across the four tiers of English football. The pre-2000 era is limited to basic match outcomes and full-time goals. From 2000 onwards, the dataset expands to include granular match statistics, such as shots, corners, fouls, and disciplinary records. Finally, post-2020, data fidelity improves further to include match start times.
 
-```{r fig.height= 9, fig.width=8}
-
-
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(tidyr)
-library(ggalluvial)
-library(lubridate)
-library(GGally)
-library(scales)   # para rescale()
-library(vcd)
-
-missing_summary <- Data_England %>%
-  group_by(League, Season) %>%
-  summarise(across(everything(), ~100* mean(is.na(.))), .groups = "drop") %>%  # proportion missing
+```{r fig.height= 9, fig.width=10}
+missing_summary <- Data_England |>
+  group_by(League, Season) |>
+  summarise(across(everything(), ~100* mean(is.na(.))), .groups = "drop") |>  # proportion missing
   pivot_longer(
     cols = -c(League, Season),
     names_to = "variable",
     values_to = "prop_missing"
-  ) %>%
-  group_by(variable) %>%
-  mutate(total_missing = mean(prop_missing, na.rm = TRUE)) %>%
-  ungroup() %>%
+  ) |>
+  group_by(variable) |>
+  mutate(total_missing = mean(prop_missing, na.rm = TRUE)) |>
+  ungroup() |>
   mutate(variable = fct_reorder(variable, total_missing, .desc = TRUE))
 
 missing_summary=missing_summary |>
@@ -181,7 +176,7 @@ ggplot(missing_summary, aes(x = variable, y = Season, fill = prop_missing)) +
     x = "Variable",
     y = "Season"
   ) +
-  theme_minimal(base_size = 12) +
+  my_custom_theme() +
   theme(
     axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
     panel.spacing = unit(1, "lines")
@@ -265,12 +260,12 @@ plot_outlier_heatmap <- function(outlier_list) {
     zscore_pct   = sapply(outlier_list, function(x) x$z_outlier_pct),
     iqr_pct      = sapply(outlier_list, function(x) x$iqr_outlier_pct),
     percentile_pct = sapply(outlier_list, function(x) x$pct_outlier_pct)
-  ) %>%
-    pivot_longer(cols = -variable, names_to = "method", values_to = "pct") %>%
+  ) |>
+    pivot_longer(cols = -variable, names_to = "method", values_to = "pct") |>
     ggplot(aes(x = method, y = variable, fill = pct)) +
     geom_tile() +
-    scale_fill_gradient(low = "white", high = "red") +
-    theme_minimal(base_size = 13) +
+    scale_fill_gradient(low = "white", high = "#191970") +
+    my_custom_theme() +
     labs(
       title = "Outlier Percentage by Method",
       x = "Method",
@@ -295,13 +290,13 @@ plot_density_outliers <- function(df, col) {
   p1  <- quantile(x, 0.05)
   p99 <- quantile(x, 0.95)
   
-  tibble(value = x) %>%
+  tibble(value = x) |>
     ggplot(aes(value)) +
-    geom_bar(fill = "steelblue", alpha = 0.75) +
+    geom_bar(fill = "#191970", alpha = 0.75) +
     geom_vline(xintercept = p1,  color = "red", linetype = "dashed") +
     geom_vline(xintercept = p99, color = "red", linetype = "dashed") +
     scale_x_continuous(breaks = seq(0, 9, by = 1))+
-    theme_minimal(base_size = 13) +
+    my_custom_theme()+
     labs(
       title = paste("Distribution of", col),
       subtitle = "Red dashed lines = 5th & 95th percentiles",
