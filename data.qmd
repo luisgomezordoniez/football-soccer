@@ -124,7 +124,10 @@ My_Data_England=Data_England |>
 
 ## Mising Values 
 
-```{r fig.height= 10}
+
+We can identify three distinct tiers of data completeness across the four tiers of English football. The pre-2000 era is limited to basic match outcomes and full-time goals. From 2000 onwards, the dataset expands to include granular match statistics, such as shots, corners, fouls, and disciplinary records. Finally, post-2020, data fidelity improves further to include match start times.
+
+```{r fig.height= 9, fig.width=8}
 
 
 library(dplyr)
@@ -176,7 +179,11 @@ ggplot(missing_summary, aes(x = variable, y = Season, fill = prop_missing)) +
 
 ```
 
+
+
 ### Outliers
+
+The heatmap compares how often different outlier-detection methods flag extreme values in each match variable. Across most variables, all three methods identify very few outliers, indicating generally well‑behaved distributions. In contrast, red‑card variables (HR, AR) and, to a lesser extent, full‑time home goals (FTHG) show much higher outlier percentages, especially under the IQR method, revealing heavy tails or rare extreme events, which is reasonable since its not common to have a game with a lot of goals or red cards.
 
 ```{r}
 outlier_analysis <- function(df, cols) {
@@ -227,6 +234,7 @@ outlier_analysis <- function(df, cols) {
 
 columns_to_check <- c(
   "FTHG","FTAG",      # goals
+  "HTHG","HTAG",      # goals
   "HS","AS",          # shots
   "HST","AST",        # shots on target
   "HF","AF",          # fouls
@@ -261,33 +269,44 @@ plot_outlier_heatmap <- function(outlier_list) {
 
 plot_outlier_heatmap(outliers)
 
+
+
 ```
 
+For example, the outliers in home‑team goals per match (FTHG) and in red cards for both home (HR) and away teams (AR) are concentrated near the upper quantiles of their respective distributions.
 
 ```{r}
+plot_density_outliers <- function(df, col) {
+  x <- df[[col]]
+  x <- x[!is.na(x)]
+  
+  p1  <- quantile(x, 0.05)
+  p99 <- quantile(x, 0.95)
+  
+  tibble(value = x) %>%
+    ggplot(aes(value)) +
+    geom_bar(fill = "steelblue", alpha = 0.75) +
+    geom_vline(xintercept = p1,  color = "red", linetype = "dashed") +
+    geom_vline(xintercept = p99, color = "red", linetype = "dashed") +
+    scale_x_continuous(breaks = seq(0, 9, by = 1))+
+    theme_minimal(base_size = 13) +
+    labs(
+      title = paste("Distribution of:", col),
+      subtitle = "Red dashed lines = 5th & 95th percentiles",
+      x = col,
+      y = "Number of games"
+    )
+}
 
-library(ggplot2)
-library(patchwork)
-
-# Boxplots for FTHG and FTAG
-p1 <- ggplot(Data_England, aes(x = FTHG)) +
-  geom_bar(fill = "lightblue") +
-  facet_wrap(~Season)+
-  labs(title = "Home Goals (FTHG) - Boxplot", y = "Goals") +
-  theme_minimal()
-
-p2 <- ggplot(Data_England, aes(y = FTAG)) +
-  geom_boxplot(fill = "lightgreen", alpha = 0.7, outlier.color = "red", outlier.size = 2) +
-  labs(title = "Away Goals (FTAG) - Boxplot", y = "Goals") +
-  theme_minimal()
-
-p1
-
-
+plot_density_outliers(Data_England, "HR")
+plot_density_outliers(Data_England, "AR")
+plot_density_outliers(Data_England, "FTHG")
 ```
 
-::: {.callout-note collapse="true"}
-The column names of our data set are not very informative. So we decided to include them in case the reader find them unintuitive.
+::: {.callout-notes collapse="true"}
+## Expand To Learn About Column Names
+
+The column names of our data set are not very informative. We decided to include them here in case the reader find them hard to understand.
 
 - Div = League Division
 - Date = Match Date (dd/mm/yy)
@@ -303,7 +322,6 @@ The column names of our data set are not very informative. So we decided to incl
 
 Match Statistics (where available)
 
-- Attendance = Crowd Attendance
 - Referee = Match Referee
 - HS = Home Team Shots
 - AS = Away Team Shots

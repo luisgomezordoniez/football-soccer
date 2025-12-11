@@ -41,6 +41,15 @@ library(vcd)
 
 Data_England <- read_csv("https://github.com/luisgomezordoniez/football-soccer/raw/refs/heads/main/data/Data_England.csv")
 
+Data_England =Data_England |>
+  mutate(
+    League=case_when(
+    Div=="E0" ~"Premier League",
+    Div=="E1" ~"Championship",
+    Div=="E2" ~"League One",
+    Div=="E3" ~"League Two"))
+
+
 #summary(Data_England)
 
 Data_England$League <- factor(Data_England$League, levels =c("Premier League", "Championship","League One", "League Two"), ordered = TRUE)
@@ -156,7 +165,7 @@ premier_goals_yearly |>
 
 While the average number of goals by home teams has remained relatively stable since 1993, away teams show a clear upward trend in goals, reflecting more offensive strategies, especially since 2015. This suggests a reduction in the traditional home-field advantage.
 
-```{r}
+```{r fig.height=10}
 
 
 
@@ -254,7 +263,7 @@ Over the past three decades, Premier League results show a decrease in draws, an
 
 We have 116 teams across all the tiers, we can see that London and
 
-```{r}
+```{r fig.width=12, fig.height=12}
 {
   stadiums <- data.frame(
   team = c(
@@ -378,7 +387,7 @@ premier_league_teams <- unique(filter(Data_England, Div=="E0" & Season=="2024/20
 ggplot() +
   geom_sf(data = england_wales_regions,aes(fill=region), 
           color = "white", linewidth = 0.3) +
-  geom_point(data = stadiums, aes(x = lon, y = lat), color = "black", size = 1.5, alpha = .5) +
+  geom_point(data = stadiums, aes(x = lon, y = lat), color = "black", size = 2.5, alpha = .5) +
   geom_label_repel(data = stadiums %>% filter(team %in% premier_league_teams),
                    aes(x = lon, y = lat, label = team),  
                    min.segment.length = 0, seed = 42, max.overlaps = 30,
@@ -395,7 +404,7 @@ To Do: Add number of teams per region. (?)
 
 # Team performance by league over the years
 
-```{r}
+```{r fig.height=9, fig.width=7}
 calculate_points <- function(full_time_result, is_home_team) {
   case_when(
     full_time_result == "H" & is_home_team ~ 3,
@@ -511,6 +520,93 @@ Data_Teams_Enhanced %>%
   theme(legend.position = "bottom")
 
 ```
+## Ridgeline ideas
+```{r}
+library(ggplot2)
+library(ggridges)
+library(dplyr)
+
+# 1. Prepare the data (Calculate Goal Difference)
+plot_data <- Data_England %>%
+  mutate(GoalDiff = FTHG - FTAG,
+         # Reorder League so Premier League is at the top/bottom as preferred
+         League = factor(League, levels = c("Premier League", "Championship", "League One", "League Two")))
+
+# 2. Create the Ridgeplot
+ggplot(plot_data, aes(x = GoalDiff, y = League, fill = stat(x))) +
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  scale_fill_viridis_c(name = "Goal Diff", option = "C") +
+  labs(title = "Home Advantage by League",
+       subtitle = "Distribution of Goal Difference (Home Goals - Away Goals)",
+       x = "Goal Difference (Positive = Home Win)",
+       y = "League") +
+  theme_minimal() +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "white") # Center line
+
+# 2. Evolution of Aggression
+# Filter: Start from 2000 (when card data became reliable)
+aggression_data <- Data_England %>%
+  filter(Season >= 2000) %>%  # Adjust year format if Season is a string (e.g., "2000/2001")
+  mutate(TotalYellows = HY + AY) %>%
+  filter(!is.na(TotalYellows))
+
+ggplot(aggression_data, aes(x = TotalYellows, y = as.factor(Season), fill = ..x..)) +
+  geom_density_ridges_gradient(scale = 2.5, rel_min_height = 0.01) +
+  scale_fill_gradient(low = "yellow", high = "orange", name = "Cards") +
+  labs(
+    title = "Evolution of Aggression",
+    subtitle = "Distribution of Total Yellow Cards per Game by Season",
+    x = "Total Yellow Cards (Home + Away)",
+    y = "Season"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none") # Hide legend if preferred for cleaner look
+
+
+# Extract hour from Time column
+Data_England$Hour <- as.numeric(format(as.POSIXct(Data_England$Time, format = "%H:%M:%S"), "%H"))
+# 3. Entertainment Value by Kick-off Time
+# Filter: Data only exists reliably after ~2019 for specific times
+time_data <- Data_England %>%
+  filter(!is.na(Hour), !is.na(FTHG), !is.na(FTAG)) %>%
+  mutate(TotalGoals = FTHG + FTAG,
+         HourLabel = factor(paste0(Hour, ":00"))) # Create readable labels like "15:00"
+
+ggplot(time_data, aes(x = TotalGoals, y = reorder(HourLabel, desc(HourLabel)), fill = ..x..)) +
+  geom_density_ridges_gradient(scale = 2, rel_min_height = 0.01, quantile_lines = TRUE, quantiles = 2) +
+  scale_fill_viridis_c(option = "magma", name = "Goals") +
+  labs(
+    title = "Entertainment Value by Kick-off Time",
+    subtitle = "Are evening games higher scoring than early kick-offs?",
+    x = "Total Goals in Match",
+    y = "Kick-off Hour"
+  ) +
+  theme_minimal()
+
+
+# 4. Shot Volume by League
+# Filter: Start from 2000 (when shot data became reliable)
+shot_data <- Data_England %>%
+  filter(Season >= 2000) %>%
+  mutate(TotalShots = HS + AS,
+         TotalGoals= FTHG+FTAG,
+         GoalsShots=TotalGoals/TotalShots) %>%
+  filter(!is.na(GoalsShots)) %>%
+  # Optional: Reorder leagues so Premier League is at the top
+  mutate(League = factor(League, levels = c("Premier League", "Championship", "League One", "League Two")))
+
+ggplot(shot_data, aes(x = TotalGoals, y = Season, fill = stat(x))) +
+  geom_density_ridges_gradient(scale = 1.5, rel_min_height = 0.01) +
+  scale_fill_viridis_c(option = "D", name = "Shots") +
+  labs(
+    title = "Shot Volume: Premier League vs Lower Tiers",
+    subtitle = "Distribution of Total Shots (Home + Away) per Game",
+    x = "Total Shots per Game",
+    y = "League"
+  ) +
+  theme_minimal()
+```
+
 
 A typical league is very competitive, besides fighting for be champion, teams also can try to get into european competitions or avoid relegation.
 
