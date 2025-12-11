@@ -1,4 +1,12 @@
 # Introduction
 
-We are interested in analyzing football soccer match results and statistics from several major leagues around the world.
-Soccer is one of the most popular sports globally, and its relevance is growing as the next World Cup approaches. We aim to explore how common match statistics such as goals, shots on target, and fouls, affect not only the outcome of individual games but also overall team performance throughout a season. We also plan to study how team rankings evolve over time, whether different strategic patterns can be identified, and how accurate betting odds are in predicting results. Through this project, we hope to discover additional insights about the game and share interesting findings.
+The history of football dates back to the 19th century, specifically to 1863 with the creation of the Football Association in London, in an effort by English teams to establish clear rules for playing this sport.
+
+::: {.callout-note}
+Creo que no debemos irnos tan atras, tal vez explicar que estamos analizando el futbol inglés porque ahí se creó la primera asociación? Le puse de nombre al proyecto The Beautiful Game, ¿te parece bien conservarlo o tal vez sacar un nombre de la introducción?
+:::
+However, the history of football extends much further, as there are records of various ball games in different cultures such as Chinese, Japanese, Greek, and Mesoamerican, dating back thousands of years. Could it be, then, that humans have an inherent need to kick a ball? Kicking may well be an instinct, but it is also true that football satisfies a series of social needs such as tribalism, competition, cooperation, and entertainment.
+
+In recent years, the collection of football-related data has multiplied, providing us with the opportunity to analyze football and understand it in depth. As the next World Cup approaches, the need to immerse ourselves in football becomes increasingly present. This is why we decided to conduct an analysis of the most representative aspects of football by choosing one of the most important leagues in the world, the Premier League, as it not only brings together highly talented players but also features a promotion and relegation system that motivates all teams to strive to be part of the select group of the best teams in English football.
+
+This project aims to analyze the evolution of the most representative aspects of the English league over the years, in terms of attack and defense. Our hypothesis is that the English football has become more competitive. We will examine this through key match indicatores including goals scored, shots on target, league standings, home versus away performance, refereeing decisions, and card intensity across Premier League matches.

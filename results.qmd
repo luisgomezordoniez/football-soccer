@@ -29,6 +29,7 @@ library(dplyr)
 # Load required libraries
 library(ggplot2)
 library(dplyr)
+library(plotly)
 
 library(dplyr)
 library(tidyr)
@@ -167,6 +168,10 @@ premier_goals_yearly |>
 
 While the average number of goals by home teams has remained relatively stable since 1993, away teams show a clear upward trend in goals, reflecting more offensive strategies, especially since 2015. This suggests a reduction in the traditional home-field advantage.
 
+::: {.callout-note}
+Creo que el Cleveland Plot se ve mejor así.
+:::
+
 ```{r fig.height=10}
 
 
@@ -210,16 +215,13 @@ ggplot(data_cleveland, aes(x = value, y = factor(Year))) +
 
 ```
 
-i\. Away goals\
 Between 1993 and 2010, away teams scored about 1.10-1.15 goals per match, but since 2011 this number has increased to around 1.20-1.25. Starting in 2018, we can observe a sustained raise in away goals, reaching historic highs in 2023 and 2024, when they exceeded 1.45 goals per match.
 
-ii\. Home goals\
 Home teams have consistently scored between 1.45 and 1.65 goals per match throughout the entire period, with small drops in 2008 and 2015. Recently, in 2023, there was an increase, but not one strong enough to confirm an upward trend.
 
-Conclusion\
 Home-field advantage has decreased significantly over the years. The recent offensive surge in the Premier League comes mainly from away teams.
 
-```{r}
+```{r,warning=FALSE,message=FALSE}
 
 premier_full_complete <- premier_full |>
   group_by(Season) |>
@@ -236,10 +238,10 @@ results_yearly <- premier_full_complete |>
 
 # Proportion of Match Results per Season — Premier League
 results_yearly |>
-  ggplot(aes(x = Year, y = prop, fill = FTR)) +
-  geom_area(alpha = 0.8) +
-  scale_fill_brewer(
-    palette = "Set1",                
+  ggplot(aes(x = Year, y = prop, color = FTR)) +
+  geom_line(linewidth = 1.2) +  
+  scale_color_brewer(
+    palette = "Set2",                
     labels = c("H" = "Home win",
                "D" = "Draw",
                "A" = "Away win"),
@@ -256,10 +258,9 @@ results_yearly |>
     legend.position = "bottom",
     plot.title = element_text(size = 14, face = "bold")
   )
-
 ```
-
 Over the past three decades, Premier League results show a decrease in draws, an increase in away-team victories, and relatively stable home-team victories. This suggests that the league has become more competitive and that the traditional home-field advantage has gradually diminished.
+
 
 ## Location of Teams
 
@@ -651,10 +652,15 @@ ggplot(shot_data, aes(x = TotalGoals, y = Season, fill = stat(x))) +
   theme_minimal()
 ```
 
+## Cambio en texto
+A typical league is highly competitive, besides fighting to become champions, teams also try to qualify for European competitions or avoid relegation.
 
-A typical league is very competitive, besides fighting for be champion, teams also can try to get into european competitions or avoid relegation.
 
-```{r fig.width=16}
+::: {.callout-note}
+Me parece que podemos dejar todas las jornadas
+:::
+
+```{r fig.width=16, fig.height=12}
 # Alluvial of the standigns of each league over the last years.
 
 
@@ -741,7 +747,7 @@ ggplot(
     lode.guidance = "frontback",
     alpha         = 0.65
   ) +
-  geom_stratum(width = 0.25, color = "grey30") +
+  geom_stratum(width = 0.35, color = "grey30") +
   stat_stratum(
     geom  = "text",
     aes(label = after_stat(stratum)),
@@ -774,7 +780,7 @@ ggplot(
     y        = "Number of teams",
     caption  = "Source: football-data.co.uk | EDAV Final Project"
   ) +
-  theme_minimal(base_size = 13) +
+  theme_minimal(base_size = 14) +
   theme(
     panel.grid.major.x = element_blank(),
     panel.grid.minor   = element_blank()
@@ -782,6 +788,11 @@ ggplot(
 
 
 ```
+The Premier League is considered an extremely competitive league due to its more equitable distribution of broadcasting revenue, te quality of signings, and the high athletic level of the playeres. Nevertheless, if we look at last season´s table, we can identify three types of teams: those that fight for the top positions, those that remain in the middle of the table, and those that struggle to avoid finishing last. The first ten matches of the 2024 were not definite to predict how the teams would end the season were not enough to predict how the teams would finish; after the tenth match, the die was pretty much cast, and the battle unfolded within each of these three groups.
+
+::: {.callout-note}
+¿Si ponemos todos los años?
+:::
 
 ```{r}
 
@@ -892,26 +903,24 @@ ggplot(
     axis.text.y = element_blank()
   )
 ```
-is this graph repeated?
+If we go back 25 years and look at the Premier League standings for the 2000-2001 season, we can clearly see more competitiveness than by analyzing just one season. Of the twenty teams that played in the Premier League twenty-five years ago, only ten remain in the league for the 2023-2024 season. Among them, there are teams like Arsenal, Liverpool, and Chelsea, which have maintained a relatively similar position from 2000 to today; teams like Aston Villa and Tottenham, which climbed in the standings over the years, moving from the eighth and twelfth to fourth and ninth, respectively; and teams that have changed dramatically, such as Manchester United, which held first place in 2000-2001 and is now in eighth, or Manchester City, which was in eighteenth place in 2000-2001 and is now in first place. 
+
 ```{r}
-# Teams in the season 2000/2001: where are they in the current season?
-# Equipos que aparecen en 2000/2001
+# Teams in the season 2023/2024: where were they in the season 2000-2001?
 
-
-teams_first_season <- standings_final |>
-  filter(Season == "2000/2001") |>
+teams_last_season <- standings_final |>
+  filter(Season == "2023/2024") |> 
   pull(Team)
 
-standings_first <- standings_final |>
-  filter(Team %in% teams_first_season) |>
+standings_last <- standings_final |>
+  filter(Team %in% teams_last_season) |>
   mutate(
     Season = factor(Season, levels = seasons_sel),
     PosFactor = factor(Position, levels = 20:1)
   )
 
-# Gráfica
 ggplot(
-  standings_first,
+  standings_last,
   aes(x = Season,
       stratum  = PosFactor,
       alluvium = Team,
@@ -926,20 +935,20 @@ ggplot(
                aes(label = after_stat(stratum)),
                size = 3, color = "black") +
   guides(fill = "none") +
-  # Etiquetas en la PRIMERA temporada (lado izquierdo)
+  # Etiquetas en la ÚLTIMA temporada (lado derecho)
   geom_text(
     stat = "alluvium",
-    data = standings_first |>
-      filter(Season == seasons_sel[1]),  # Primera temporada
+    data = standings_last |>
+      filter(Season == seasons_sel[length(seasons_sel)]),
     aes(label = Team),
-    size = 3, color = "black", hjust = 1.05,  # hjust > 1 para ponerlo a la izquierda
-    position = position_nudge(x = -0.2)  # Nudge negativo para mover a la izquierda
+    size = 3, color = "black", hjust = -0.05, 
+    position = position_nudge(x = 0.2)  
   ) +
-  scale_x_discrete(expand = expansion(mult = c(0.20, 0.02))) +  # Más espacio a la izquierda
+  scale_x_discrete(expand = expansion(mult = c(0.02, 0.20))) +
   scale_y_reverse(breaks = NULL) +
   labs(
-    title    = "Evolution of 2000/2001 Teams",
-    subtitle = "Premier League — Where did the early 2000s teams end up?",
+    title    = "Evolution of 2023/2024 Teams",
+    subtitle = "Premier League — Where did today's teams come from?",
     x        = "Season",
     y        = NULL,
     caption  = "Source: football-data.co.uk | EDAV Final Project"
@@ -951,21 +960,26 @@ ggplot(
     axis.text.y = element_blank()
   )
 ```
+When we analyze the teams in the current season and compare their historical positions, we can confirm the behavior observed in the previous plot. We also we see that all the teams ranked from tenth place downward were not competing in the Premier League twenty-five years ago. Most of them were already in the league five years ago, but some were not consistently present before and have only recently been promoted to the Premier League, such as Bournemouth, Brentford, Nottingham Forest, and Luton.
+
+This is a positive sign the league's competitiveness as it indicates that newly promoted teams can enter the Premier League and compete with the top clubs.
 
 ## Relation among numeric variables
 
+::: {.callout-note}
+Ya no tenemos odds en la tabla. Creo que se le pueden agregar más variables al PCP.
+:::
+
 We would like to conduct and analysis to examine the relationships among the different numeric variables in the dataset, for example: the number of goals, (home/away), shots, corners, offsides, total card points (yellow + red), win odds, and draw odds.
 
+
+
+## First option
+Demasiadas líneas y no se entiende bien qué pasa con ellas. Dos opciones:
+1. Solo dejar la última temporada.
+2. Hacerla interactiva.
+
 ```{r}
-
-
-#premier_full_complete |>
-#  group_by(Season) |>
-#  summarise(
-#    shots_missing = sum(is.na(HS) | is.na(AS)),
-#    shots_on_target_missing = sum(is.na(HST) | is.na(AST))
-#  ) |>
-#  arrange(shots_missing)
 
 premier_full_complete <- premier_full |>
   group_by(Season) |>
@@ -973,7 +987,6 @@ premier_full_complete <- premier_full |>
   ungroup()
 
 team_stats <- bind_rows(
-  # Partidos como LOCAL
   premier_full_complete |>
     transmute(
       Season,
@@ -985,7 +998,6 @@ team_stats <- bind_rows(
       SOTFor    = HST,
       SOTAg     = AST
     ),
-  # Partidos como VISITANTE
   premier_full_complete |>
     transmute(
       Season,
@@ -1010,79 +1022,43 @@ team_stats <- bind_rows(
     .groups = "drop"
   )
 
-# Table with goals and shots for each team by season
 seasons_focus <- c("2000/2001", "2009/2010", "2023/2024")
-
 team_stats_focus <- team_stats |>
   filter(Season %in% seasons_focus) |>
   mutate(
     Season = factor(Season, levels = seasons_focus)
   )
 
-# 2. Parallel coordinates plot
-ggparcoord(
-  data        = team_stats_focus,
-  columns     = match(
-    c("goals_for",
-      "goals_against",
-      "shots_on_target_for",
-      "shots_on_target_against"),
-    names(team_stats_focus)
-  ),
-  groupColumn = "Season",
-  scale       = "globalminmax",  # todos los ejes entre 0 y 1
-  alphaLines  = 0.6,
-  showPoints  = TRUE
-) +
-  labs(
-    title = "Team Profiles Across Seasons — Premier League",
-    subtitle = "Parallel coordinates for seasons 2000/2001, 2009/2010 and 2023/2024",
-    x = "Metric",
-    y = "Scaled value"
-  ) +
-  theme_minimal(base_size = 11) +
-  theme(
-    plot.title = element_text(size = 14, face = "bold"),
-    legend.position = "bottom"
-  )
-```
-
-```{r}
-
-
-# 1. Temporadas que queremos comparar
-seasons_focus <- c("2000/2001", "2009/2010", "2023/2024")
-
-team_stats_focus <- team_stats |>
-  filter(Season %in% seasons_focus) |>
-  mutate(
-    Season = factor(Season, levels = seasons_focus)
-  )
-
-# 2. Reescalar métricas a [0,1] (min–max global)
 team_stats_scaled <- team_stats_focus |>
   mutate(
     goals_for_s               = rescale(goals_for),
-    goals_against_s           = rescale(goals_against),
     shots_on_target_for_s     = rescale(shots_on_target_for),
+    goals_against_s           = rescale(goals_against),
     shots_on_target_against_s = rescale(shots_on_target_against)
   )
 
-# 3. Parallel coordinates con métricas escaladas
 GGally::ggparcoord(
   data        = team_stats_scaled,
   columns     = match(
     c("goals_for_s",
-      "goals_against_s",
       "shots_on_target_for_s",
+      "goals_against_s",
       "shots_on_target_against_s"),
     names(team_stats_scaled)
   ),
   groupColumn = "Season",
-  scale       = "globalminmax",   # ya están en [0,1], esto no cambia nada
+  scale       = "globalminmax", 
   alphaLines  = 0.6,
   showPoints  = TRUE
 ) +
+  scale_x_discrete(
+    labels = c(
+      "goals_for_s" = "Goals For",
+      "shots_on_target_for_s" = "Shots on Target For",
+      "goals_against_s" = "Goals Against",
+      "shots_on_target_against_s" = "Shots on Target Against"
+    )
+  ) +
   labs(
     title = "Team Profiles Across Seasons — Premier League",
     subtitle = "Metrics rescaled to [0,1] for seasons 2000/2001, 2009/2010 and 2023/2024",
@@ -1096,7 +1072,99 @@ GGally::ggparcoord(
   )
 
 ```
+## Second option
+Gráfica interactiva
+```{r}
 
+library(plotly)
+
+seasons_focus <- c("2000/2001", "2009/2010", "2023/2024")
+team_stats_focus <- team_stats |>
+  filter(Season %in% seasons_focus) |>
+  mutate(
+    Season = factor(Season, levels = seasons_focus)
+  )
+
+team_stats_scaled <- team_stats_focus |>
+  mutate(
+    goals_for_s               = rescale(goals_for),
+    shots_on_target_for_s     = rescale(shots_on_target_for),
+    goals_against_s           = rescale(goals_against),
+    shots_on_target_against_s = rescale(shots_on_target_against)
+  )
+
+p <- GGally::ggparcoord(
+  data        = team_stats_scaled,
+  columns     = match(
+    c("goals_for_s",
+      "shots_on_target_for_s",
+      "goals_against_s",
+      "shots_on_target_against_s"),
+    names(team_stats_scaled)
+  ),
+  groupColumn = "Season",
+  scale       = "globalminmax", 
+  alphaLines  = 0.6,
+  showPoints  = TRUE
+) +
+  scale_x_discrete(
+    labels = c(
+      "goals_for_s" = "Goals For",
+      "shots_on_target_for_s" = "Shots on Target For",
+      "goals_against_s" = "Goals Against",
+      "shots_on_target_against_s" = "Shots on Target Against"
+    )
+  ) +
+  labs(
+    title = "Team Profiles Across Seasons — Premier League",
+    subtitle = "Click buttons to filter by season",
+    x = "Metric",
+    y = "Scaled value"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    legend.position = "bottom"
+  )
+
+ggplotly(p) |>
+  layout(
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        xanchor = "center",
+        yanchor = "bottom",  # Cambié de "top" a "bottom"
+        x = 0.5,
+        y = -0.15,           # Cambié de 1.15 a -0.15 (negativo para ponerlo abajo)
+        buttons = list(
+          list(
+            method = "restyle",
+            args = list("visible", list(TRUE, TRUE, TRUE)),
+            label = "All Seasons"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", list(TRUE, FALSE, FALSE)),
+            label = "2000/2001"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", list(FALSE, TRUE, FALSE)),
+            label = "2009/2010"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", list(FALSE, FALSE, TRUE)),
+            label = "2023/2024"
+          )
+        )
+      )
+    )
+  )
+```
+
+Across teams, we observe strong positive associations between shots on target and goals scored, as well as between shots on target conceded and goals conceded. However, shots on target generated by a team no meaningful relationship with the goals it concedes, suggesting that offensive productivity and defensive vulneratiblity operate independently.
 ## Relation among categorical variables
 
 We want to analyze the existing categorical data and create additional categorical variables to better understand the relationships between team results and certain classifications. We would also like to explore the behavior of different teams, for example, how many home teams that were losing a match ended up winning it, or which leagues are more "home-biased" (meaning that home teams win most of the matches).
@@ -1840,3 +1908,125 @@ ggplot(significant_ref_team, aes(x = Referee, y = HomeTeam)) +
     legend.position = "bottom"
   )
 ```
+
+## Fair play
+
+::: {.callout-note}
+Creo que debemos hacer algo con los ejes cuando tenemos temporadas. En algunas lo dejamos como Season: 2020/2021 y en otras como año: 2020. Voy a generar desde data England una variable que sea "Year", sólo hay que ponernos de acuerdo si debería ser el año en que empezó o el año en que terminó la temporada.
+:::
+
+```{r,warning=FALSE,message=FALSE}
+library(dplyr)
+library(tidyr)
+
+cards_fouls_yearly <- premier_full_complete |>
+  filter(as.numeric(substr(Season, 1, 4)) >= 2000) |>
+  group_by(Season) |>
+  summarise(
+    n_matches = n(),
+    fouls_total  = sum(HF, na.rm = TRUE) + sum(AF, na.rm = TRUE),
+    yellow_total = sum(HY, na.rm = TRUE) + sum(AY, na.rm = TRUE),
+    red_total    = sum(HR, na.rm = TRUE) + sum(AR, na.rm = TRUE),
+    fouls_per_match  = fouls_total / n_matches,
+    yellow_per_match = yellow_total / n_matches,
+    red_per_match    = red_total / n_matches,
+    Year = as.numeric(substr(Season, 1, 4))
+  ) |>
+  arrange(Year)
+
+cards_fouls_long <- cards_fouls_yearly |>
+  pivot_longer(
+    cols = c(fouls_per_match, yellow_per_match, red_per_match),
+    names_to = "metric",
+    values_to = "value"
+  ) |>
+  mutate(
+    metric = factor(
+      metric,
+      levels = c("fouls_per_match", "yellow_per_match", "red_per_match"),
+      labels = c("Fouls", "Yellow Cards", "Red Cards")
+    )
+  )
+
+ggplot(cards_fouls_long, aes(x = Year, y = value, color = metric)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 2) +
+  geom_smooth(method = "loess", se = FALSE, color = "black", linewidth = 0.5) +
+  facet_wrap(~ metric, scales = "free_y", nrow = 1) +
+  scale_color_manual(
+    values = c(
+      "Fouls" = "steelblue",
+      "Yellow Cards" = "gold",
+      "Red Cards" = "red"
+    )
+  ) +
+  labs(
+    title = "Fouls and Cards per Match — Premier League",
+    subtitle = "Complete seasons (2000–2024)",
+    x = "Season",
+    y = "Per match"
+  ) +
+  guides(color = "none") +  # Oculta la leyenda ya que los facets indican la categoría
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    strip.text = element_text(face = "bold", size = 12)
+  )
+```
+
+From 2000 to 2024, fouls per match show an overall decreasing trend, especially from 2000 to 2013, followed by a more stable pattern in recent years. This behavior can be related to better playing techniques and to a stricter strategies from referees. When looking at yellow cards over the same period, we observe a constant trend from 2000 to 2020. This suggests that, even though fouls decreased, referees continued issuing yellow cards at similar rates, which is evidence of a stricter interpretation of the rules. This aligns with the fact that the regulations have become stronger and penalize more unsporting conducts. Red cards, meanwhile, have historically been rare events in matches. Although they appear to decrease slightly, they remain at consistently low levels.
+
+```{r,warning=FALSE,message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(scales) 
+
+cards_result_band <- premier_full_complete |>
+  mutate(
+    total_cards = HY + AY + HR + AR,
+    card_band = case_when(
+      total_cards <= 1 ~ "0–1 cards",
+      total_cards <= 3 ~ "2–3 cards",
+      total_cards <= 5 ~ "4–5 cards",
+      TRUE            ~ "6+ cards"
+    )
+  ) |>
+  filter(!is.na(FTR), !is.na(card_band)) |>
+  group_by(card_band, FTR) |>
+  summarise(n = n(), .groups = "drop") |>
+  group_by(card_band) |>
+  mutate(prop = n / sum(n)) |>
+  ungroup()
+
+cards_result_band <- cards_result_band |>
+  mutate(
+    FTR = factor(FTR, levels = c("H", "D", "A"))
+  )
+
+ggplot(cards_result_band,
+       aes(x = FTR, y = card_band, fill = prop)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = percent(prop, accuracy = 1)),
+            color = "black", size = 3) +
+  scale_fill_gradientn(
+  colours = c("#f7fbff", "#c6dbef", "#6baed6", "#08519c"),
+  limits  = c(0, 1),                
+  breaks  = c(0, 0.25, 0.5, 0.75, 1),
+  labels  = scales::percent,
+  name    = "Proportion of matches"
+) +
+
+  labs(
+    title    = "Match Result vs. Card Intensity — Premier League",
+    subtitle = "Rows: total cards in the match (yellow + red)",
+    x        = "Full-time result (FTR)",
+    y        = "Card intensity band"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid = element_blank()
+  )
+
+```
+
+This graph shows the joint distribution between card intensity and full-time result of a match. For all levels of card intensity, most matches are won by the home team. Nevertheless, this home advantage decreases as card intensity rises: home wins drop from 52% in low-card matches (0-1 cards) to 44% in high-card matches (6+ cards). On the other hand, away wins remain practically constant at 28% across all bands, suggesting that this result is not affected by card intensity. Draws also increase along with card intensity, rising from 20% to 28%.
