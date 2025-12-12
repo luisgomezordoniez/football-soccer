@@ -109,8 +109,6 @@ premier_goals_yearly |>
 
 While the average number of goals by home teams has remained relatively stable since 1993, away teams show a clear upward trend in goals, reflecting more offensive strategies, especially since 2015. This suggests a reduction in the traditional home-field advantage.
 
-
-
 Between 1993 and 2010, away teams scored about 1.10-1.15 goals per match, but since 2011 this number has increased to around 1.20-1.25. Starting in 2018, we can observe a sustained raise in away goals, reaching historic highs in 2023 and 2024, when they exceeded 1.45 goals per match.
 
 Home teams have consistently scored between 1.45 and 1.65 goals per match throughout the entire period, with small drops in 2008 and 2015. Recently, in 2023, there was an increase, but not one strong enough to confirm an upward trend.
@@ -157,12 +155,10 @@ goals_monthly <- Data_England |>
   filter(Season %in% Seasons & Div == "E0") |>
   mutate(MatchDate = dmy(Date),                
          Month = month(MatchDate, label = TRUE, abbr = TRUE)) |>
-  # Define factor levels to ensure correct sorting (Aug -> Jul)
   mutate(Month = factor(Month, levels = c("Aug", "Sep", "Oct", "Nov", "Dec", 
                                           "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"))) |>
   group_by(Month, Season) |>
   summarise(AvgGoals = mean(FTHG + FTAG, na.rm = TRUE), .groups = "drop") |>
-  # FIX: Complete the data to insert NA rows for missing months (e.g., Apr/May 2020)
   tidyr::complete(Season, Month)
 
 ggplot(goals_monthly, aes(x = Month, y = AvgGoals, group = Season, color = Season)) +
@@ -173,6 +169,10 @@ ggplot(goals_monthly, aes(x = Month, y = AvgGoals, group = Season, color = Seaso
   theme_football()
 ```
 
+
+The traditional europan schedule for a seasons spans from August to May of the next year. In this time-series analysis we evaluated the "End of Season Madness" hypothesis—the theory that goalscoring rates increase significantly in the final months of the campaign due to high stakes (title chases/relegation battles) or fatigue. 
+
+The 2019/2020 season (blue line) illustrates the unique impact of the COVID-19 pandemic schedule. It is the only season with data extending into June and July, where scoring rates remained high (~3.0 goals), suggesting that the break in play did not negatively impact attacking output.
 
 
 
@@ -200,7 +200,8 @@ results_cum <- results_long |>
   mutate(game_number = row_number(), cum_pts     = cumsum(Points), cum_gd      = cumsum(GD), cum_gf      = cumsum(GF)) |>
   ungroup()
 
-# Ranking after each game weekstandings_by_round <- results_cum |>
+# Ranking after each game week
+standings_by_round <- results_cum |>
   group_by(game_number) |>
   arrange(desc(cum_pts), desc(cum_gd), desc(cum_gf), Team, .by_group = TRUE) |>
   mutate(Position = row_number()) |>
@@ -296,13 +297,14 @@ Data_Teams_Enhanced |>
   coord_flip() +
   scale_fill_manual(values = c("Currently in Premier League" = "steelblue", "Lower Tiers" = "lightsteelblue")) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
-  labs(title = "Premier League Seasons and Titles", x = "Team", y = "Seasons", fill = "", caption="") +
+  labs(title = "Premier League Seasons and Titles",
+       caption="1995-2025",x = "Team", y = "Seasons", fill = "") +
   theme_football() +
   theme(legend.position = "bottom")
 
 ```
 
-
+Premier League is the highest tier in the English Football system, in our sample we have 32 complete seasons. Manchester United is the team with more titles, followed up by Mancester City... 
 
 
 ```{r}
@@ -680,13 +682,13 @@ teams_timeline <- team_timeline |>
   fill(Tier, League, .direction = "down") |>
   filter(!is.na(Tier))
 
-ggplot(teams_timeline, aes(x = Season, y = Tier, group = Team)) +
+ggplot(teams_timeline, aes(x = substr(Season,6,9), y = Tier, group = Team)) +
   geom_line(color = "steelblue", linewidth = 1.2) +
   geom_point(color = "darkblue", size = 2) +
   scale_y_discrete(limits=rev) +
   facet_wrap(~ Team, ncol = 3) +  # 4 columns, 5 rows for 17 teams
   labs(
-    title = "Team Performance Timelines (1993-2024)",
+    title = "Team Performance Timelines (1994-2024)",
     x = "Season",
     y = "Tier"
   ) +
@@ -697,7 +699,6 @@ ggplot(teams_timeline, aes(x = Season, y = Tier, group = Team)) +
     strip.text = element_text(face = "bold", size = 9),
     panel.spacing = unit(1, "lines")
   )
-
 
 ```
 
@@ -828,7 +829,7 @@ Across teams, we observe strong positive associations between shots on target an
 We know that many of the numerical variables in our dataset are related, so within each league we would like to identify clusters of teams that share similar behavior across seasons. Based on these clusters, we could create indexes and provide explanations for the patterns observed.
 
 ```{r}
-# Create team-level aggregated data
+
 most_recent_season <- max(Data_England$Season, na.rm = TRUE)
 
 current_tier1_teams <- Data_England |>
@@ -838,7 +839,6 @@ current_tier1_teams <- Data_England |>
 
 
 team_performance <- Data_England |>
-  # Home performances
   select(Season, Team = HomeTeam, 
          Goals_For = FTHG, Goals_Against = FTAG,
          Shots = HS, Shots_Target = HST,
@@ -846,7 +846,6 @@ team_performance <- Data_England |>
          Yellow_Cards = HY, Red_Cards = HR,
          Result = FTR) |>
   mutate(Venue = "Home") |>
-  # Away performances
   bind_rows(
     Data_England |>
       filter(Div == "E0") |>
@@ -860,62 +859,40 @@ team_performance <- Data_England |>
   ) |>
   group_by(Team) |>
   summarise(
-    # Goal metrics
     Avg_Goals_For = mean(Goals_For, na.rm = TRUE),
     Avg_Goals_Against = mean(Goals_Against, na.rm = TRUE),
     Goal_Difference = mean(Goals_For - Goals_Against, na.rm = TRUE),
-    
-    # Shooting metrics
     Avg_Shots = mean(Shots, na.rm = TRUE),
     Avg_Shots_Target = mean(Shots_Target, na.rm = TRUE),
     Shot_Accuracy = ifelse(mean(Shots, na.rm = TRUE) > 0,
                            mean(Shots_Target, na.rm = TRUE) / mean(Shots, na.rm = TRUE),
                            0),
-    
-    # Defensive metrics
     Avg_Fouls = mean(Fouls, na.rm = TRUE),
     Avg_Corners = mean(Corners, na.rm = TRUE),
-    
-    # Discipline metrics
     Avg_Yellow_Cards = mean(Yellow_Cards, na.rm = TRUE),
     Avg_Red_Cards = mean(Red_Cards, na.rm = TRUE),
-    
-    # WIN COUNTS - NEW ADDITIONS
     Home_Wins = sum(Venue == "Home" & Result == "H", na.rm = TRUE),
     Away_Wins = sum(Venue == "Away" & Result == "A", na.rm = TRUE),
     Total_Wins = sum((Venue == "Home" & Result == "H") | (Venue == "Away" & Result == "A"), na.rm = TRUE),
-    
-    # Performance metrics
     Win_Rate = Total_Wins / n(),
     Draw_Rate = sum(Result == "D", na.rm = TRUE) / n(),
     Loss_Rate = sum((Venue == "Home" & Result == "A") | (Venue == "Away" & Result == "H"), na.rm = TRUE) / n(),
-    
-    # Home/Away specific rates
     Home_Win_Rate = Home_Wins / sum(Venue == "Home"),
     Away_Win_Rate = Away_Wins / sum(Venue == "Away"),
-    
-    # Venue metrics
     Home_Matches = sum(Venue == "Home"),
     Away_Matches = sum(Venue == "Away"),
-    
-    # Sample size
     Matches_Played = n(),
-    
-    .groups = 'drop'
-  ) |>
+    .groups = 'drop') |>
   filter(Matches_Played >= 50)  # Only teams with sufficient data  # Only teams with sufficient data
-
 
 team_performance=team_performance |>
   filter(Team %in% current_tier1_teams) 
-# Select numeric variables for PCA
 
 team_performance <- team_performance |>
   mutate(across(where(is.numeric), ~ ifelse(is.nan(.), 0, .)))
 
 team_performance <- team_performance |>
   mutate_if(is.numeric, ~ifelse(is.infinite(.), 0, .))
-
 
 pca_data <- team_performance |>
   select(Avg_Goals_For, Avg_Goals_Against,
@@ -927,10 +904,8 @@ pca_data <- team_performance |>
 rownames(pca_data) <- team_performance$Team
 
 
-# Perform PCA
 pca_result <- PCA(pca_data, graph = FALSE)
 
-# Basic biplot
 fviz_pca_biplot(pca_result, 
                 repel = TRUE,
                 col.var = "red",
@@ -940,6 +915,23 @@ fviz_pca_biplot(pca_result,
 
 
 
+
+
+```
+
+```{r}
+res.hcpc <- HCPC(pca_result, nb.clust = -1, graph = FALSE)
+
+# 2. Plot the Dendrogram
+fviz_dend(res.hcpc, 
+          cex = 0.6,                     # Label size
+          palette = "jco",               # Color palette (try "jco", "npg", "uchicago")
+          rect = TRUE,                   # Add rectangles around groups
+          rect_fill = TRUE,              # Fill rectangles
+          rect_border = "jco",           # Rectangle color
+          labels_track_height = 0.8,     # Adjust space for labels
+          main = "Hierarchical Clustering Dendrogram"
+          )
 
 
 ```
@@ -1005,24 +997,10 @@ ggplot(df_big6_prop, aes(x = Month, y = prop, color = Team_Result, group = Team_
     title = "Monthly Result Proportions for Big 6 Teams",
     y = "Proportion of Results",
     color = "Result"
-  ) +
-  theme_minimal(base_size = 12)
+  ) + theme_football()
 
 ```
 
-```{r}
-ggplot(df_big6_prop, aes(x = Month, y = Team_Result, fill = prop)) +
-  geom_tile(color = "white") +
-  facet_wrap(~ Team, ncol = 3) +
-  scale_fill_viridis_c(option = "magma", direction = -1) +
-  labs(
-    title = "Heatmap of Result Proportions by Month (Big 6 Teams)",
-    x = "Month",
-    y = "Result",
-    fill = "Proportion"
-  ) +
-  theme_minimal(base_size = 12)
-```
 
 ## Referee analysys, is there bias?
 
@@ -1035,35 +1013,17 @@ To Do: Decide which one to get
 
 df_clean <- Data_England |>
   mutate(Referee_Clean = Referee) |>
-  
-  # 1. Remove dots explicitly first (e.g., "P. Walker" -> "P Walker")
+
   mutate(Referee_Clean = str_remove_all(Referee_Clean, "\\.")) |>
   
-  # 2. Handle the "Lastname, Firstname" format (e.g., "Yates, N" -> "N Yates")
-  # Regex explanation:
-  # ^(.*),      -> Capture everything before the comma (Surname)
-  # \s* -> Match any spaces after comma
-  # (.*)$       -> Capture everything after (Firstname/Initial)
-  # \\2 \\1     -> Swap them (Firstname Surname)
   mutate(Referee_Clean = str_replace(Referee_Clean, "^(.*),\\s*(.*)$", "\\2 \\1")) |>
   
-  # 3. Trim extra whitespace created by the swap
   mutate(Referee_Clean = str_squish(Referee_Clean)) |>
   
-  # 4. Force to Title Case (e.g., "n yates" -> "N Yates")
   mutate(Referee_Clean = str_to_title(Referee_Clean)) |>
 
-  # 5. Convert EVERYONE to "Initial Surname" format
-  # Regex explanation:
-  # ^(.)        -> Capture the very first character (The Initial)
-  # .* -> Match all the letters in the middle (ignore them)
-  # \s+         -> Match the space before the surname
-  # (.*)$       -> Capture the last word (The Surname)
-  # \\1 \\2     -> Rebuild as "Initial space Surname"
   mutate(Referee_Final = str_replace(Referee_Clean, "^(.).*\\s+(.*)$", "\\1 \\2"))
 
-# --- Check the results ---
-# This will show you the original vs the cleaned version
 check_data <- df_clean |> 
   group_by(Referee, Referee_Final) |> 
   summarise(conteo=n())
@@ -1104,24 +1064,11 @@ Referees |>
     x = "Referee",
     y = "Matches"
   ) +
-  theme_minimal()
+  theme_football()
 
-Referees |>
-  mutate(
-    home_win_rate = Home_wins_count / Count_matches,
-    away_win_rate = Away_wins_count / Count_matches
-  ) |>
-  ggplot(aes(x = home_win_rate, y = away_win_rate, fill = Count_matches)) +
-  geom_point(alpha = 0.7, color = "steelblue") +
-  
-  labs(
-    title = "Home vs Away Win Rates per Referee",
-    x = "Home Win Rate",
-    y = "Away Win Rate",
-    size = "Matches Refereed"
-  ) +
-  theme_minimal()
-
+```
+Explain
+```{r}
 
 Referees |>
   mutate(
@@ -1135,10 +1082,12 @@ Referees |>
     title = "Do More Experienced Referees Show Less Home Bias?",
     x = "Matches ",
     y = "Home Win Rate"
-  ) +
-  theme_minimal()
+  ) + theme_football()
 
+```
+Explain
 
+```{r}
 Referees_Home_team=Data_England_Referee |>
   filter(!Referee=="Unknown")|>
   mutate(HomeWon=ifelse(FTR=="H",1,0),
@@ -1160,11 +1109,9 @@ Referees_Home_team <- Referees_Home_team |>
     Total_matches = Count_matches
   )
 
-# Filter for meaningful combinations (enough matches)
 significant_ref_team <- Referees_Home_team |>
-  filter(Total_matches >= 25)  # Only consider referee-team pairs with 5+ matches
+  filter(Total_matches >= 25)  
 
-# Heatmap
 ggplot(significant_ref_team, aes(x = Referee, y = HomeTeam)) +
   geom_tile(aes(fill = Home_win_rate), color = "white") +
   scale_fill_gradient2(
@@ -1178,8 +1125,7 @@ ggplot(significant_ref_team, aes(x = Referee, y = HomeTeam)) +
     subtitle = "Heatmap showing if referees favor certain home teams",
     x = "Referee",
     y = "Home Team"
-  ) +
-  theme_minimal() +
+  ) + theme_football()
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
     axis.text.y = element_text(size = 7),
@@ -1189,15 +1135,12 @@ ggplot(significant_ref_team, aes(x = Referee, y = HomeTeam)) +
 
 ## Fair play
 
-::: {.callout-note}
-Creo que debemos hacer algo con los ejes cuando tenemos temporadas. En algunas lo dejamos como Season: 2020/2021 y en otras como año: 2020. Voy a generar desde data England una variable que sea "Year", sólo hay que ponernos de acuerdo si debería ser el año en que empezó o el año en que terminó la temporada.
-:::
 
 ```{r,warning=FALSE,message=FALSE}
 
 
 cards_fouls_yearly <- premier_full_complete |>
-  filter(as.numeric(substr(Season, 1, 4)) >= 2000) |>
+  filter(as.numeric(substr(Season, 6, 9)) >= 2001) |>
   group_by(Season) |>
   summarise(
     n_matches = n(),
@@ -1244,7 +1187,7 @@ ggplot(cards_fouls_long, aes(x = Year, y = value, color = metric)) +
     y = "Per match"
   ) +
   guides(color = "none") +  # Oculta la leyenda ya que los facets indican la categoría
-  theme_minimal(base_size = 13) +
+  theme_football()+
   theme(
     plot.title = element_text(size = 16, face = "bold"),
     strip.text = element_text(face = "bold", size = 12)
@@ -1296,8 +1239,7 @@ ggplot(cards_result_band,
     subtitle = "Rows: total cards in the match (yellow + red)",
     x        = "Full-time result (FTR)",
     y        = "Card intensity band"
-  ) +
-  theme_minimal(base_size = 12) +
+  ) + theme_football()+
   theme(
     panel.grid = element_blank()
   )
