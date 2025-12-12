@@ -39,14 +39,12 @@ Data_England =Data_England |>
     Div=="E3" ~"League Two"))
 
 
-#summary(Data_England)
-
 Data_England$League <- factor(Data_England$League, levels =c("Premier League", "Championship","League One", "League Two"), ordered = TRUE)
 
 Data_England$Year=as.numeric(substr(Data_England$Date,7,10))
 
 theme_football <- function() {
-  theme_classic(base_size = 12) + # Start with a built-in theme as a base
+  theme_classic(base_size = 12) +  
     theme(
       plot.title = element_text(size = 14, face = "bold"),
       plot.subtitle = element_text(size = 12, margin = margin(b = 10)),
@@ -122,7 +120,6 @@ premier_full_complete <- premier_full |>
   filter(n() == 380) |>
   ungroup()
 
-# Proportion of results: H, A, D
 results_yearly <- premier_full_complete |>
   group_by(Year, FTR) |>
   summarise(n = n(), .groups = "drop") |>
@@ -130,7 +127,6 @@ results_yearly <- premier_full_complete |>
   mutate(prop = n / sum(n)) |>
   ungroup()
 
-# Proportion of Match Results per Season — Premier League
 results_yearly |>
   ggplot(aes(x = Year, y = prop, color = FTR)) +
   geom_line(linewidth = 1.2) +
@@ -205,7 +201,6 @@ results_cum <- results_long |>
   mutate(game_number = row_number(), cum_pts     = cumsum(Points), cum_gd      = cumsum(GD), cum_gf      = cumsum(GF)) |>
   ungroup()
 
-# Ranking after each game week
 standings_by_round <- results_cum |>
   group_by(game_number) |>
   arrange(desc(cum_pts), desc(cum_gd), desc(cum_gf), Team, .by_group = TRUE) |>
@@ -576,7 +571,6 @@ library(sf)
 library(ggrepel)
 library(dplyr)
 
-# 1. Prepare Combined Labels (Same as before)
 df_teams <- stadiums |>
   filter(team %in% premier_league_teams) |>
   select(name = team, lat, lon) |>
@@ -594,9 +588,8 @@ df_regions <- england_wales_regions_cnt |>
 
 all_labels <- bind_rows(df_teams, df_regions)
 
-# 2. Plotting
 ggplot() +
-  # --- Layer 1: Map (Uses Fill Scale for Numbers) ---
+ 
   geom_sf(data = england_wales_regions_cnt,
           aes(fill = n_teams), color = "white", linewidth = 0.3) +
   
@@ -604,27 +597,26 @@ ggplot() +
                       low = "lightblue", high = "#191970", 
                       na.value = "grey95") +
 
-  # --- Layer 2: Stadium Points ---
+
   geom_point(data = stadiums, aes(x = lon, y = lat),
              color = "black", size = 2, alpha = 0.6) +
 
-  # --- Layer 3: Unified Labels ---
   geom_label_repel(
     data = all_labels,
     aes(x = lon, y = lat, label = name, 
-        color = type,     # Distinguish by Text Color
-        size = type,      # Distinguish by Text Size
-        fontface = type   # Distinguish by Font Weight
+        color = type,    
+        size = type,     
+        fontface = type   
     ),
-    fill = "black",       # <--- FIX: Hardcode fill to white (prevents error)
-    alpha = 0.8,          # Slight transparency for the box
+    fill = "black",       
+    alpha = 0.8,          
     seed = 42,
     min.segment.length = 0,
     max.overlaps = 220,
     box.padding = 0.5
   ) +
 
-  # --- Custom Styles for Text ---
+
   scale_color_manual(values = c("Team" = "white", "Region" = "yellow")) +
   scale_size_manual(values = c("Team" = 2.5, "Region" = 3.5)) + 
   scale_discrete_manual("fontface", values = c("Team" = "plain", "Region" = "bold")) +
@@ -658,7 +650,6 @@ Data_England_Matches=Data_England |>
 x=Data_England |>
   filter(is.na(Tier)==T)
 
-# Get unique teams and their tiers by Season
 team_timeline <- Data_England |>
   select(Season, HomeTeam, Tier, League) |>
   rename(Team = HomeTeam) |>
@@ -695,9 +686,6 @@ current_tiers <- teams_timeline |>
 teams_timeline <- teams_timeline |>
   left_join(current_tiers, by = "Team")
 
-
-
-# Facet wrap - each team gets its own panel
 teams_timeline <- team_timeline |>
   filter(Team %in% selected_teams) |>
   complete(Season = unique(team_timeline$Season), Team) |>
@@ -710,7 +698,7 @@ ggplot(teams_timeline, aes(x = substr(Season,6,9), y = Tier, group = Team)) +
   geom_point(color = "#191970", size = 2) +
   scale_y_discrete(limits=rev) +
   scale_x_discrete(breaks = c("1995", "2000", "2005","2010","2015", "2020","2025"))+
-  facet_wrap(~ Team, ncol = 3) +  # 4 columns, 5 rows for 17 teams
+  facet_wrap(~ Team, ncol = 3) +  
   labs(
     title = "Team Performance Timelines (1994-2024)",
     x = "Season",
@@ -905,7 +893,7 @@ team_performance <- Data_England |>
     Away_Matches = sum(Venue == "Away"),
     Matches_Played = n(),
     .groups = 'drop') |>
-  filter(Matches_Played >= 50)  # Only teams with sufficient data  # Only teams with sufficient data
+  filter(Matches_Played >= 50)  
 
 team_performance=team_performance |>
   filter(Team %in% current_tier1_teams) 
@@ -921,7 +909,7 @@ pca_data <- team_performance |>
          Avg_Shots, Avg_Shots_Target,
          Avg_Fouls, Avg_Corners, Avg_Yellow_Cards, Avg_Red_Cards,
          Draw_Rate,Home_Win_Rate,Away_Win_Rate) |>
-  scale()  # Standardize the variables
+  scale()  
 
 rownames(pca_data) <- team_performance$Team
 
