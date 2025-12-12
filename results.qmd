@@ -2,9 +2,9 @@
 
 ## Home Advantage
 
-We want to see how football has changed through the years in terms of attack and defense. Our hypothesis is that the english football has become more competitive. For proving this hypothesis we will analyze the differences among the teams that conform the Premier League and the lower tiers, the dominance and the results of the matches.
+We want to examine how football has evolved over the years in terms of attack and defense. We hypothesize that English football has become more competitive. To prove this hypothesis, we will analyze the differences among the teams that comprise the Premier League and the lower tiers, including their dominance and match results.
 
-First of all, we know that goals can be a strong indicator to understand this, so we plan to base our first analysis on the average number of goals scored by teams.
+First of all, we recognize that goals can be a strong indicator of this understanding, so we base our initial analysis on the average number of goals scored by teams.
 
 ```{r,warning=FALSE,message=FALSE}
 library(dplyr)
@@ -107,13 +107,13 @@ premier_goals_yearly |>
 
 
 
-While the average number of goals by home teams has remained relatively stable since 1993, away teams show a clear upward trend in goals, reflecting more offensive strategies, especially since 2015. This suggests a reduction in the traditional home-field advantage.
+While the average number of goals scored by home teams has remained relatively stable since 1993, away teams have shown a clear upward trend in goals, reflecting more offensive strategies, especially since 2015. This suggests a reduction in the traditional home-field advantage.
 
-Between 1993 and 2010, away teams scored about 1.10-1.15 goals per match, but since 2011 this number has increased to around 1.20-1.25. Starting in 2018, we can observe a sustained raise in away goals, reaching historic highs in 2023 and 2024, when they exceeded 1.45 goals per match.
+Between 1993 and 2010, away teams scored approximately 1.10-1.15 goals per match; however, since 2011, this number has increased to around 1.20-1.25. Starting in 2018, we can observe a sustained rise in away goals, reaching historic highs in 2023 and 2024, when they exceeded 1.45 goals per match.
 
-Home teams have consistently scored between 1.45 and 1.65 goals per match throughout the entire period, with small drops in 2008 and 2015. Recently, in 2023, there was an increase, but not one strong enough to confirm an upward trend.
+Home teams have consistently scored between 1.45 and 1.65 goals per match throughout the entire period, with small drops in 2008 and 2015. In 2023, there was an increase, although not one strong enough to confirm an upward trend.
 
-Home-field advantage has decreased significantly over the years. The recent offensive surge in the Premier League comes mainly from away teams.
+Home-field advantage has decreased significantly over the years. The recent surge in offensive performances in the Premier League comes mainly from away teams.
 
 ```{r,warning=FALSE,message=FALSE}
 
@@ -148,7 +148,7 @@ Over the past three decades, Premier League results show a decrease in draws, an
 ::: {.callout-note collapse="true"}
 ## Results on football
 
-Football is a low scoring sport. The most frequent results are 0-0, 1-0 and 1-1.
+Football is a low-scoring sport. The most frequent results are 0-0, 1-0, and 1-1.
 :::
 
 ## Seasonal trends
@@ -175,9 +175,9 @@ ggplot(goals_monthly, aes(x = Month, y = AvgGoals, group = Season, color = Seaso
 ```
 
 
-The traditional europan schedule for a seasons spans from August to May of the next year. In this time-series analysis we evaluated the "End of Season Madness" hypothesis, the theory that goalscoring rates increase significantly in the final months of the campaign due to high stakes (title chases/relegation battles) or fatigue. 
+The traditional European season schedule spans from August to May of the following year. In this time-series analysis, we evaluated the "End of Season Madness" hypothesis, the theory that goalscoring rates increase significantly in the final months of the campaign due to high stakes (title chases/relegation battles) or fatigue. 
 
-The 2019/2020 season (blue line) illustrates the unique impact of the COVID-19 pandemic schedule. It is the only season with data extending into June and July, where scoring rates remained high (~3.0 goals), suggesting that the break in play did not negatively impact attacking output.
+The 2019/2020 season (blue line) illustrates the unique impact of the COVID-19 pandemic schedule. It is the only Season with data extending into June and July, where scoring rates remained high (~3.0 goals), suggesting that the break in play did not negatively impact attacking output.
 
 
 
@@ -238,13 +238,13 @@ ggplot(alluvial_df, aes(x = Matchday, stratum  = PosFactor, alluvium = Team, y= 
 ```
 
 
-The Premier League is considered an extremely competitive league due to its more equitable distribution of broadcasting revenue, the quality of signings, and the high athletic level of the players. Nevertheless, if we look at last season´s table, we can identify three types of teams: those that fight for the top positions, those that remain in the middle of the table, and those that struggle to avoid finishing last. The first ten matches of the 2024/2025 season were not definite to predict how the teams would end the season were not enough to predict how the teams would finish; after the tenth match, the die was pretty much cast, and the battle unfolded within each of these three groups.
+The Premier League is considered an extremely competitive league due to its more equitable distribution of broadcasting revenue, the quality of signings, and the high athletic level of the players. Nevertheless, if we look at last Season´s table, we can identify three types of teams: those that fight for the top positions, those that remain in the middle of the table, and those that struggle to avoid finishing last. The first ten matches of the 2024/2025 season were not enough to predict how the teams would finish; after the tenth match, the die was pretty much cast, and the battle unfolded within each of these three groups.
 
 ::: {.callout-note collapse="true"}
 
 ## Champions
 
-The champion of a season is the team with most points. A victory grants 3 points, a draw grants 1 point and a loss grants 0 points. Liverpool and Manchester City are the two teams with most titles in the top tier with 20 titles. Liverpool had a drougth from the season 1989/1990 to the season 2019/2020.
+The champion of a season is the team with the most points. A victory grants 3 points, a draw grants 1 point, and a loss grants 0 points. Liverpool and Manchester City are the two teams with the most titles in the top tier, with 20 titles. Liverpool experienced a drought from the 1989/1990 season to the 2019/2020 season.
 :::
 ## Team performance by league over the years
 
@@ -314,7 +314,7 @@ Data_Teams_Enhanced |>
 
 ```
 
-This bar chart shows total Premier League seasons (1995-2025) for each team, with yellow segments indicating titles won and colors distinguishing current Premier League teams (darker blue) from those in lower tiers (lighter blue). In our sample, Man United leads with 12 titles across 30 seasons, followed by Man City (8), Chelsea (5), Arsenal (3), and Liverpool (2), while Leicester and Blackburn each won once. The "Big Six" (Tottenham, Man United, Liverpool, Everton, Chelsea, Arsenal) have maintained near-constant Premier League presence, while many clubs like Leeds, Nottingham Forest, and Sheffield United have spent significant periods in lower divisions, illustrating the difficulty of sustaining top-flight status outside the elite group.
+This bar chart displays the total number of Premier League seasons (1995-2025) for each team, with yellow segments indicating titles won and colors distinguishing between current Premier League teams (darker blue) and those in lower tiers (lighter blue). In our sample, Man United leads with 12 titles across 30 seasons, followed by Man City (8), Chelsea (5), Arsenal (3), and Liverpool (2), while Leicester and Blackburn each won once. The "Big Six" (Tottenham, Manchester United, Liverpool, Everton, Chelsea, Arsenal) have maintained a near-constant presence in the Premier League. At the same time, many clubs, such as Leeds, Nottingham Forest, and Sheffield United, have spent significant periods in lower divisions, illustrating the difficulty of sustaining top-flight status outside the elite group.
 
 ```{r}
 
@@ -394,10 +394,10 @@ ggplot(
   ) +
   theme_football()
 ```
-If we go back 25 years and look at the Premier League standings for the 2000-2001 season, we can clearly see more competitiveness than by analyzing just one season. Of the twenty teams that played in the Premier League twenty-five years ago, only ten remain in the league for the 2023-2024 season. Among them, there are teams like Arsenal, Liverpool, and Chelsea, which have maintained a relatively similar position from 2000 to today; teams like Aston Villa and Tottenham, which climbed in the standings over the years, moving from the eighth and twelfth to fourth and ninth, respectively; and teams that have changed dramatically, such as Manchester United, which held first place in 2000-2001 and is now in eighth, or Manchester City, which was in eighteenth place in 2000-2001 and is now in first place. 
+If we go back 25 years and examine the Premier League standings for the 1995-1996 season, we can clearly see more competitiveness than by analyzing just one Season. Of the twenty teams that played in the Premier League twenty-five years ago, only ten remain in the league for the 2023-2024 season. Among them, there are teams like Arsenal, Liverpool, and Chelsea, which have maintained a relatively similar position from 2000 to today; teams like Aston Villa and Tottenham, which climbed in the standings over the years, moving from the eighth and twelfth to fourth and ninth, respectively; and teams that have changed dramatically, such as Manchester United, which held first place in 2000-2001 and is now in eighth, or Manchester City, which was in eighteenth place in 2000-2001 and is now in first place. 
 
 ```{r}
-# Teams in the season 2023/2024: where were they in the season 2000-2001?
+# Teams in the Season 2023/2024: where were they in the Season 2000-2001?
 
 teams_last_season <- standings_final |>
   filter(Season == "2024/2025") |> 
@@ -429,16 +429,16 @@ ggplot(standings_last,
     x        = "Season", y        = NULL
   ) + theme_football()
 ```
-When we analyze the teams in the current season and compare their historical positions, we can confirm the behavior observed in the previous plot. We also we see that all the teams ranked from tenth place downward were not competing in the Premier League twenty-five years ago. Most of them were already in the league five years ago, but some were not consistently present before and have only recently been promoted to the Premier League, such as Bournemouth, Brentford, Nottingham Forest, and Luton.
+When we analyze the teams in the current Season and compare their historical positions, we can confirm the behavior observed in the previous plot. We also see that all the teams ranked from tenth place downward were not competing in the Premier League twenty-five years ago. Most of them had already been in the league for five years. However, some, such as Bournemouth, Brentford, Nottingham Forest, and Luton, were not consistently present before and have only recently been promoted to the Premier League.
 
-This is a positive sign the league's competitiveness as it indicates that newly promoted teams can enter the Premier League and compete with the top clubs.
+This is a positive sign for the league's competitiveness, as it indicates that newly promoted teams can enter the Premier League and compete with the top clubs.
 
 
 ::: {.callout-note collapse="true"}
 
 ## Promotion and Relegation
 
-Each season the bottom 3 teams are relegated to the Championship (second tier), while 3 teams of the Championship are promoted to the Premier League, the two top-finishing teams are automatically promoted to the Premier League. The teams that finish the season in third to sixth place enter a play-off tournament, with the winner also gaining promotion to the Premier League.
+Each Season, the bottom three teams are relegated to the Championship (the second tier), while three teams from the Championship are promoted to the Premier League. The two top-finishing teams are automatically promoted to the Premier League. The teams that finish the Season in third to sixth place enter a play-off tournament, with the winner also gaining promotion to the Premier League.
 :::
 ## The English Football System
 
@@ -634,7 +634,7 @@ ggplot() +
   theme_football()
   
 ```
-Here we displays the locations of football stadiums for all clubs across the top four tiers of English football, while the highlighted labels identify only the teams competing in the most recent Premier League season. The regions are shaded by how many clubs (tiers 1–4) they contain, revealing clear geographic patterns: the North West emerges as the strongest football hub, with the highest concentration of clubs and multiple Premier League sides such as Manchester United, Manchester City, Liverpool, and Everton. Greater London also shows a dense cluster of stadiums and several Premier League teams—Arsenal, Chelsea, Tottenham, West Ham, Crystal Palace, Fulham, and Brentford—reflecting the capital’s deep football footprint. Regions like Yorkshire and the Humber, the Midlands, and the South Coast host fewer top-flight teams but remain important centers of the broader football pyramid. In contrast, areas such as the South West and East Wales contain very few professional clubs. Overall, the map illustrates both the widespread presence of football across England and the regional clustering of elite Premier League teams in major urban and historically industrial areas.
+Here, we display the locations of football stadiums for all clubs across the top four tiers of English football. The highlighted labels identify only the teams competing in the most recent Premier League season. The regions are shaded according to the number of clubs (tiers 1–4) they contain, revealing clear geographic patterns: the North West emerges as the strongest football hub, with the highest concentration of clubs and multiple Premier League sides, including Manchester United, Manchester City, Liverpool, and Everton. Greater London also features a dense cluster of stadiums and several Premier League teams, including Arsenal, Chelsea, Tottenham, West Ham, Crystal Palace, Fulham, and Brentford, reflecting the capital’s deep football heritage. Regions like Yorkshire and the Humber, the Midlands, and the South Coast host fewer top-flight teams but remain important centers of the broader football pyramid. In contrast, areas such as the South West and East Wales contain very few professional clubs. Overall, the map illustrates both the widespread presence of football across England and the regional clustering of elite Premier League teams in major urban and historically industrial areas.
 
 
 
@@ -658,7 +658,7 @@ Data_England_Matches=Data_England |>
 x=Data_England |>
   filter(is.na(Tier)==T)
 
-# Get unique teams and their tiers by season
+# Get unique teams and their tiers by Season
 team_timeline <- Data_England |>
   select(Season, HomeTeam, Tier, League) |>
   rename(Team = HomeTeam) |>
@@ -726,7 +726,7 @@ ggplot(teams_timeline, aes(x = substr(Season,6,9), y = Tier, group = Team)) +
 
 ```
 
-This visualization tracks the league-tier journeys of the only clubs that have appeared in all four tiers of the English football pyramid between 1993 and 2024. Each panel represents a single club, showing how its competitive level has shifted over three decades. Overall, the chart highlights how unusual and turbulent it is for a club to have competed in all four tiers, and it visually emphasizes the instability, promotions, relegations, and competitive volatility these clubs have experienced. 
+This visualization tracks the league-tier journeys of the only clubs that have appeared in all four tiers of the English football pyramid between 1993 and 2024. Each panel represents a single club, showing how its competitive level has shifted over three decades. Overall, the chart highlights the unusual and turbulent nature of a club competing in all four tiers, visually emphasizing the instability, promotions, relegations, and competitive volatility these clubs have experienced. 
 
 
 
@@ -844,11 +844,11 @@ ggplotly(p, tooltip = "text") |>
   )
 ```
 
-Across teams, we observe strong positive associations between shots on target and goals scored, as well as between shots on target conceded and goals conceded. However, shots on target generated by a team no meaningful relationship with the goals it concedes, suggesting that offensive productivity and defensive vulneratiblity operate independently.
+Across teams, we observe strong positive associations between shots on target and goals scored, as well as between shots on target conceded and goals conceded. However, shots on target generated by a team show no meaningful relationship with the goals it concedes, suggesting that offensive productivity and defensive vulnerability operate independently of each other.
 
 ## Detection of clusters
 
-We know that many of the numerical variables in our dataset are related, so within each league we would like to identify clusters of teams that share similar behavior across seasons. Based on these clusters, we could create indexes and provide explanations for the patterns observed.
+We know that many of the numerical variables in our dataset are related, so within each league, we aim to identify clusters of teams that exhibit similar behavior across seasons. Based on these clusters, we can create indices and provide explanations for the observed patterns.
 
 ```{r}
 
@@ -940,7 +940,7 @@ fviz_pca_biplot(pca_result,
 
 
 ```
-We performed a PCA analysys using some of the numerical variables that we have in our dataset. The biplot shows a dominant contrast between top attacking teams and lower-performing or defensively burdened teams, with a secondary axis capturing discipline vs. cleanliness in play style. Traditionally, England sport press likes to cluster Manchester United, Manchester City, Liverpool, Arsenal, Chelsea and Tottenham as the top 6 important teams (The Big 6), however here we can see that Tottenham is not so close to the rest of the Big 6 teams, while Liverpool have a great attacking power and also a low rate of average fouls commited.
+We performed a PCA analysis using some of the numerical variables that we have in our dataset. The biplot reveals a distinct contrast between top-attacking teams and lower-performing or defensively burdened teams, with a secondary axis highlighting discipline versus cleanliness in play style. Traditionally, the English sports press has clustered Manchester United, Manchester City, Liverpool, Arsenal, Chelsea, and Tottenham as the top six important teams (The Big 6); however, here we can see that Tottenham is not as close to the rest of the Big 6 teams. At the same time, Liverpool possesses great attacking power and a low rate of average fouls committed.
 
 
 
@@ -996,9 +996,9 @@ ggplot(df_big6_prop, aes(x = Month, y = prop, color = Team_Result, group = Team_
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
 ```
-This graph displays the monthly proportion of wins, draws, and losses for England's Big 6 teams from 1995 to 2025, revealing a clear performance hierarchy. Man City and Liverpool dominate with consistently high win rates (50-65%), while Man United shows periods of exceptional performance with win rates approaching 70%, likely reflecting their success in the earlier years of this period. Arsenal and Chelsea maintain steady mid-tier performance with win rates around 50-60%. Tottenham shows the most concerning trend, with their win rate (blue) declining and loss rate (green) increasing significantly, particularly toward the end of the season where losses nearly match wins by May. Draw rates remain relatively stable across all teams at 20-30%, and while there's some month-to-month variation, no dramatic seasonal patterns emerge, suggesting these proportions reflect overall team quality rather than specific calendar effects.
+This graph displays the monthly proportion of wins, draws, and losses for England's Big 6 teams from 1995 to 2025, revealing a clear performance hierarchy. Man City and Liverpool dominate with consistently high win rates (50-65%). In comparison, Man United shows periods of exceptional performance with win rates approaching 70%, likely reflecting their success in the earlier years of this period. Arsenal and Chelsea maintain a steady mid-tier performance, with win rates of around 50-60%. Tottenham shows the most concerning trend, with their win rate (blue) declining and loss rate (green) increasing significantly, particularly toward the end of the Season, where losses nearly match wins by May. Draw rates remain relatively stable across all teams, ranging from 20% to 30%. However, there is some month-to-month variation; no dramatic seasonal patterns emerge, suggesting that these proportions reflect overall team quality rather than specific calendar effects.
 
-## Referee analysys, is there bias?
+## Referee analysis, is there bias?
 
 
 
@@ -1063,7 +1063,7 @@ Referees |>
   theme(legend.position="bottom")
 
 ```
-This graph ranks the top Premier League referees by total matches officiated between 1995 and 2025, with Mike Dean leading at approximately 650 matches, followed by Kevin Stroud and Martin Atkinson around 600 matches. The symbols distinguish referees who worked through 3 tiers (circles) versus 4 tiers (triangles) of English football before reaching the Premier League, showing a fairly even mix of both pathways among the most experienced officials. Most top referees cluster between 400-650 matches, representing typical career lengths at the Premier League level over this 30-year period, with no clear correlation between the number of lower divisions worked and ultimate longevity in the top flight.
+This graph ranks the top Premier League referees by the total number of matches officiated between 1995 and 2025, with Mike Dean leading with approximately 650 matches, followed by Kevin Friend and Martin Atkinson, who have officiated around 600 matches each. The symbols distinguish referees who worked through 3 tiers (circles) versus four tiers (triangles) of English football before reaching the Premier League, showing a relatively even mix of both pathways among the most experienced officials. Most top referees cluster between 400 and 650 matches, representing typical career lengths at the Premier League level over these 30 years, with no clear correlation between the number of lower divisions worked and ultimate longevity in the top flight.
 
 ```{r}
 
@@ -1086,7 +1086,7 @@ Referees |>
 ```
 
 
-The data shows a clear downward trend: less experienced referees (under 100 matches) display more scattered and often higher home win rates (ranging from 0.3 to 0.7), while more experienced referees (300+ matches) cluster around a narrower, lower range of approximately 0.35-0.45. This pattern suggests that experienced referees do indeed show reduced home bias, with their decisions converging toward more consistent outcomes regardless of venue. The color coding reveals no obvious pattern between the number of tiers worked and home bias, indicating that total experience rather than career pathway is the key factor in minimizing home advantage effects.
+The data shows a clear downward trend: less experienced referees (under 100 matches) display more scattered and often higher home win rates (ranging from 0.3 to 0.7), while more experienced referees (300+ matches) cluster around a narrower, lower range of approximately 0.35-0.45. This pattern suggests that experienced referees indeed show reduced home bias, with their decisions converging toward more consistent outcomes, regardless of the venue. The color coding reveals no evident pattern between the number of tiers worked and home bias, indicating that total experience rather than career pathway is the key factor in minimizing home advantage effects.
 ```{r}
 Referees_Home_team=Data_England_Referee |>
   filter(!Referee=="Unknown")|>
@@ -1134,7 +1134,7 @@ ggplot(significant_ref_team, aes(x = Referee, y = HomeTeam)) +
   )
 ```
 
-This heatmap shows home team win rates for specific referee-team combinations (minimum 25 matches), with red indicating higher win rates and blue indicating lower rates. Arsenal displays consistently high home win rates across all referees, while Man City performs particularly well under M Oliver. Top teams like Arsenal, Man City, and Liverpool generally show stronger home performance (more red) across most referees, likely reflecting their overall quality rather than referee bias, while teams like Tottenham, Everton, and Rochdale show more blue shading, indicating lower home win rates that suggest either weaker home form or more neutral officiating during these matches.
+This heatmap displays home team win rates for specific referee-team combinations (with a minimum of 25 matches), where red indicates higher win rates and blue indicates lower rates. Arsenal displays consistently high home win rates across all referees, while Man City performs exceptionally well under M Oliver. Top teams like Arsenal, Man City, and Liverpool generally show stronger home performance (more red) across most referees, likely reflecting their overall quality rather than referee bias. In contrast, teams like Tottenham, Everton, and Rochdale show more blue shading, indicating lower home win rates that suggest either weaker home form or more neutral officiating during these matches.
 
 ```{r}
 Referees_Away_team=Data_England_Referee |>
@@ -1245,13 +1245,13 @@ ggplot(cards_fouls_long, aes(x = Year, y = value, color = metric)) +
   )
 ```
 
-From 2000 to 2024, fouls per match show an overall decreasing trend, especially from 2000 to 2013, followed by a more stable pattern in recent years. This behavior can be related to better playing techniques and to a stricter strategies from referees. When looking at yellow cards over the same period, we observe a constant trend from 2000 to 2020. This suggests that, even though fouls decreased, referees continued issuing yellow cards at similar rates, which is evidence of a stricter interpretation of the rules. This aligns with the fact that the regulations have become stronger and penalize more unsporting conducts. Red cards, meanwhile, have historically been rare events in matches. Although they appear to decrease slightly, they remain at consistently low levels.
+From 2000 to 2024, fouls per match show an overall decreasing trend, especially from 2000 to 2013, followed by a more stable pattern in recent years. This behavior can be attributed to improved playing techniques and stricter strategies from referees. When examining yellow cards over the same period, we observe a consistent trend from 2000 to 2020. This suggests that, even though fouls decreased, referees continued issuing yellow cards at similar rates, which is evidence of a stricter interpretation of the rules. This aligns with the fact that the regulations have become stronger and penalize more unsporting conduct. Red cards, meanwhile, have historically been rare events in matches. Although they appear to decrease slightly, they remain at consistently low levels.
 
 ::: {.callout-note collapse="true"}
 
 ## Cards
 
-A yellow card is a formal caution for minor misconduct like dissent, time-wasting, or unsporting behavior, while a red card is a dismissal from the game for serious offenses (e.g., violent conduct, denying a goal-scoring opportunity) or receiving a second yellow card in the same match, forcing the player's team to play with one less player. 
+A yellow card is a formal caution for minor misconduct, such as dissent, time-wasting, or unsporting behavior. In contrast, a red card results in a player's dismissal from the game for serious offenses (e.g., violent conduct, denying a goalscoring opportunity) or receiving a second yellow card in the exact match, forcing the player's team to play with one fewer player. 
 :::
 
 ```{r,warning=FALSE,message=FALSE}
@@ -1304,4 +1304,4 @@ ggplot(cards_result_band,
 
 ```
 
-This graph shows the joint distribution between card intensity and full-time result of a match. For all levels of card intensity, most matches are won by the home team. Nevertheless, this home advantage decreases as card intensity rises: home wins drop from 52% in low-card matches (0-1 cards) to 44% in high-card matches (6+ cards). On the other hand, away wins remain practically constant at 28% across all bands, suggesting that this result is not affected by card intensity. Draws also increase along with card intensity, rising from 20% to 28%.
+This graph shows the joint distribution between card intensity and the full-time result of a match. For all levels of card intensity, the majority of matches are won by the home team. Nevertheless, this home advantage decreases as card intensity rises: home wins drop from 52% in low-card matches (0-1 cards) to 44% in high-card matches (6+ cards). On the other hand, away wins remain practically constant at 28% across all bands, suggesting that this result is not affected by card intensity. Draws also increase along with card intensity, rising from 20% to 28%.

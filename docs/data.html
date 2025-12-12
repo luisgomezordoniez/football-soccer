@@ -208,13 +208,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This project uses publicly available match-level data provided by Football-Data.co.uk, a long-standing repository of standardized football results and match statistics. The platform compiles official match information from multiple reputable sources—including XScores, BBC Sport, Flashscore, and ESPN—and distributes them in a consistent, computer-ready CSV format suitable for statistical analysis.</p>
+<p>This project uses publicly available match-level data provided by Football-Data.co.uk, a long-standing repository of standardized football results and match statistics. The platform compiles official match information from multiple reputable sources, including XScores, BBC Sport, Flashscore, and ESPN. It distributes it in a consistent, computer-ready CSV format suitable for statistical analysis.</p>
 <section id="description" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="description"><span class="header-section-number">2.1</span> Description</h2>
-<p>For the purposes of this study, only data from English football competitions were used. These include the Premier League (Tier 1), Championship (Tier 2), League One (Tier 3) and League Two (Tier4). The dataset covers more than two decades of competitive play, with full-time and half-time results available back to the 1993/94 season and detailed match statistics widely available from the 2000/01 season onward.</p>
+<p>For this study, only data from English football competitions were used. These include the Premier League (Tier 1), Championship (Tier 2), League One (Tier 3), and League Two (Tier 4). The dataset spans more than two decades of competitive play, with full-time and half-time results available from the 1993/94 season onwards, and detailed match statistics have been widely available since the 2000/01 season.</p>
 <p>The variables utilized in this project relate exclusively to match outcomes and in-game performance metrics. These include goals scored, half-time results, shots, shots on target, corners, fouls, disciplinary actions, and referee information. Historical bookmaker odds—also included in the original files—were intentionally excluded, as the analysis focuses on sporting performance rather than betting markets.</p>
 <p>Football-Data.co.uk aggregates information from multiple official and media-based match reporting services to ensure accuracy and completeness. Data are updated on a rolling basis throughout each season and are archived annually, enabling consistent longitudinal analysis across leagues and time periods.</p>
-<p>This dataset provides a comprehensive, standardized foundation for evaluating long-term trends in English football, comparing performance across divisions, and studying changes in the nature of the game over time.</p>
+<p>This dataset provides a comprehensive, standardized foundation for evaluating long-term trends in English football, comparing performance across divisions, and studying changes in the game over time.</p>
 </section>
 <section id="data-collection" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="data-collection"><span class="header-section-number">2.2</span> Data Collection</h2>
@@ -346,7 +346,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mising-values" class="level2" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="mising-values"><span class="header-section-number">2.3</span> Mising Values</h2>
-<p>We can identify three distinct tiers of data completeness across the four tiers of English football. The pre-2000 era is limited to basic match outcomes and full-time goals. From 2000 onwards, the dataset expands to include granular match statistics, such as shots, corners, fouls, and disciplinary records. Finally, post-2020, data fidelity improves further to include match start times.</p>
+<p>We can identify three distinct tiers of data completeness across the four tiers of the English football league. The pre-2000 era is limited to basic match outcomes and full-time goals. From 2000 onwards, the dataset expanded to include granular match statistics, such as shots, corners, fouls, and disciplinary records. Finally, post-2020, data fidelity improves further to include match start times.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -396,7 +396,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="outliers" class="level2" data-number="2.4">
 <h2 data-number="2.4" class="anchored" data-anchor-id="outliers"><span class="header-section-number">2.4</span> Outliers</h2>
-<p>The heatmap compares how often different outlier-detection methods flag extreme values in each match variable. Across most variables, all three methods identify very few outliers, indicating generally well‑behaved distributions. In contrast, red‑card variables (HR, AR) and, to a lesser extent, full‑time home goals (FTHG) show much higher outlier percentages, especially under the IQR method, revealing heavy tails or rare extreme events, which is reasonable since its not common to have a game with a lot of goals or red cards.</p>
+<p>The heatmap compares how often different outlier-detection methods flag extreme values in each match variable. Across most variables, all three methods identify very few outliers, indicating generally well‑behaved distributions. In contrast, red‑card variables (HR, AR) and, to a lesser extent, full‑time home goals (FTHG) show much higher outlier percentages, especially under the IQR method, revealing heavy tails or rare extreme events, which is reasonable since it is not common to have a game with a lot of goals or red cards.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
