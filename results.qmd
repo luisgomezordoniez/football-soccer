@@ -586,7 +586,7 @@ ggplot() +
           aes(fill = n_teams), color = "white", linewidth = 0.3) +
   
   scale_fill_gradient(name = "Number of teams", 
-                      low = "lightblue", high = "darkblue", 
+                      low = "lightblue", high = "#191970", 
                       na.value = "grey95") +
 
   # --- Layer 2: Stadium Points ---
@@ -619,7 +619,7 @@ ggplot() +
   theme_football()
   
 ```
-
+Here we displays the locations of football stadiums for all clubs across the top four tiers of English football, while the highlighted labels identify only the teams competing in the most recent Premier League season. The regions are shaded by how many clubs (tiers 1–4) they contain, revealing clear geographic patterns: the North West emerges as the strongest football hub, with the highest concentration of clubs and multiple Premier League sides such as Manchester United, Manchester City, Liverpool, and Everton. Greater London also shows a dense cluster of stadiums and several Premier League teams—Arsenal, Chelsea, Tottenham, West Ham, Crystal Palace, Fulham, and Brentford—reflecting the capital’s deep football footprint. Regions like Yorkshire and the Humber, the Midlands, and the South Coast host fewer top-flight teams but remain important centers of the broader football pyramid. In contrast, areas such as the South West and East Wales contain very few professional clubs. Overall, the map illustrates both the widespread presence of football across England and the regional clustering of elite Premier League teams in major urban and historically industrial areas.
 
 ### Tier dynamics
 
@@ -684,7 +684,7 @@ teams_timeline <- team_timeline |>
 
 ggplot(teams_timeline, aes(x = substr(Season,6,9), y = Tier, group = Team)) +
   geom_line(color = "steelblue", linewidth = 1.2) +
-  geom_point(color = "darkblue", size = 2) +
+  geom_point(color = "#191970", size = 2) +
   scale_y_discrete(limits=rev) +
   facet_wrap(~ Team, ncol = 3) +  # 4 columns, 5 rows for 17 teams
   labs(
@@ -702,9 +702,7 @@ ggplot(teams_timeline, aes(x = substr(Season,6,9), y = Tier, group = Team)) +
 
 ```
 
-
-To Do: Add number of teams per region. (?)
-
+This visualization tracks the league-tier journeys of the only clubs that have appeared in all four tiers of the English football pyramid between 1993 and 2024. Each panel represents a single club, showing how its competitive level has shifted over three decades. Overall, the chart highlights how unusual and turbulent it is for a club to have competed in all four tiers, and it visually emphasizes the instability, promotions, relegations, and competitive volatility these clubs have experienced. 
 
 
 
@@ -918,34 +916,7 @@ fviz_pca_biplot(pca_result,
 
 
 ```
-
-```{r}
-res.hcpc <- HCPC(pca_result, nb.clust = -1, graph = FALSE)
-
-# 2. Plot the Dendrogram
-fviz_dend(res.hcpc, 
-          cex = 0.6,                     # Label size
-          palette = "jco",               # Color palette (try "jco", "npg", "uchicago")
-          rect = TRUE,                   # Add rectangles around groups
-          rect_fill = TRUE,              # Fill rectangles
-          rect_border = "jco",           # Rectangle color
-          labels_track_height = 0.8,     # Adjust space for labels
-          main = "Hierarchical Clustering Dendrogram"
-          )
-
-
-```
-
-To Do: Explain PCA
-
-
-
-
-
-
-
-
-
+We performed a PCA analysys using some of the numerical variables that we have in our dataset. The biplot shows a dominant contrast between top attacking teams and lower-performing or defensively burdened teams, with a secondary axis capturing discipline vs. cleanliness in play style. Traditionally, England sport press likes to cluster Manchester United, Manchester City, Liverpool, Arsenal, Chelsea and Tottenham as the top 6 important teams (The Big 6), however here we can see that Tottenham is not so close to the rest of the Big 6 teams, while Liverpool have a great attacking power and also a low rate of average fouls commited.
 
 
 
@@ -997,16 +968,15 @@ ggplot(df_big6_prop, aes(x = Month, y = prop, color = Team_Result, group = Team_
     title = "Monthly Result Proportions for Big 6 Teams",
     y = "Proportion of Results",
     color = "Result"
-  ) + theme_football()
+  ) + theme_football()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
 ```
 
 
 ## Referee analysys, is there bias?
 
-We would like to explore different ways of analyzing referees behavior during matches to determine whether referees are biased toward home teams. We also want to examine if there is any relationship between league results and World Cup outcomes. In addition, we plan to calculate the differences between the probabilities provided by betting houses and the actual outcomes, as well as conduct other complementary analyses.
 
-To Do: Decide which one to get
 
 ```{r}
 
@@ -1057,7 +1027,7 @@ Referees |>
   mutate(Referee = fct_reorder(Referee, Count_matches)) |>
   ggplot(aes(x = Referee, y = Count_matches)) +
   geom_segment(aes(xend = Referee, yend = 0), color = "grey70") +
-  geom_point(size = 3, color = "darkgreen") +
+  geom_point(size = 3, color = "#191970") +
   coord_flip() +
   labs(
     title = "Top Referees by Match Count",
@@ -1067,7 +1037,7 @@ Referees |>
   theme_football()
 
 ```
-Explain
+First we started to 
 ```{r}
 
 Referees |>
@@ -1075,7 +1045,7 @@ Referees |>
     home_win_rate = Home_wins_count / Count_matches
   ) |>
   ggplot(aes(x = Count_matches, y = home_win_rate)) +
-  geom_point(alpha = 0.3, color = "darkblue") +
+  geom_point(alpha = 0.3, color = "#191970") +
   scale_y_log10()+
   scale_x_log10()+
   labs(
@@ -1115,7 +1085,7 @@ significant_ref_team <- Referees_Home_team |>
 ggplot(significant_ref_team, aes(x = Referee, y = HomeTeam)) +
   geom_tile(aes(fill = Home_win_rate), color = "white") +
   scale_fill_gradient2(
-    low = "blue", mid = "white", high = "red", 
+    low = "#191970", mid = "white", high = "darkred", 
     midpoint = 0.5,  # Average home win rate
     limits = c(0, 1),
     name = "Home Win Rate"
@@ -1124,13 +1094,62 @@ ggplot(significant_ref_team, aes(x = Referee, y = HomeTeam)) +
     title = "Referee Home Team Win Rates",
     subtitle = "Heatmap showing if referees favor certain home teams",
     x = "Referee",
-    y = "Home Team"
-  ) + theme_football()
+    y = "Home Team",
+    caption = "Only included home team-referee combiantions with at least 20 games"
+  ) + theme_football()+
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
     axis.text.y = element_text(size = 7),
     legend.position = "bottom"
   )
+```
+
+```{r}
+Referees_Away_team=Data_England_Referee |>
+  filter(!Referee=="Unknown")|>
+  mutate(HomeWon=ifelse(FTR=="H",1,0),
+         AwayWon=ifelse(FTR=="A",1,0))|>
+  group_by(
+    Referee, HomeTeam
+  ) |>
+  summarise(Count_matches=n(),
+            n_seasons=n_distinct(Season,na.rm=T),
+            n_tiers=n_distinct(Tier,na.rm=T),
+            Home_wins_count=sum(HomeWon,na.rm=T),
+            Away_wins_count=sum(AwayWon,na.rm=T))
+
+
+
+Referees_Away_team <- Referees_Away_team |>
+  mutate(
+    Home_win_rate = Away_wins_count / Count_matches,
+    Total_matches = Count_matches
+  )
+
+significant_ref_team_away <- Referees_Away_team |>
+  filter(Total_matches >= 25)  
+
+ggplot(significant_ref_team_away, aes(x = Referee, y = HomeTeam)) +
+  geom_tile(aes(fill = Home_win_rate), color = "white") +
+  scale_fill_gradient2(
+    low = "#191970", mid = "white", high = "darkred", 
+    midpoint = 0.5,  # Average home win rate
+    limits = c(0, 1),
+    name = "Away Win Rate"
+  ) +
+  labs(
+    title = "Referee Away Team Win Rates",
+    subtitle = "Heatmap showing if referees favor certain away teams",
+    x = "Referee",
+    y = "Away Team",
+    caption = "Only included away team-referee combiantions with at least 20 games"
+  ) + theme_football()+
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+    axis.text.y = element_text(size = 7),
+    legend.position = "bottom"
+  )
+
 ```
 
 ## Fair play
