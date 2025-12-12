@@ -30,7 +30,7 @@ library(tidyr)
 library(ggalluvial)
 library(lubridate)
 library(GGally)
-library(scales)   # para rescale()
+library(scales)
 library(vcd)
 
 not_all_na <- function(x) any(!is.na(x))

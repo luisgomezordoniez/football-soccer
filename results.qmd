@@ -1245,7 +1245,7 @@ ggplot(cards_fouls_long, aes(x = Year, y = value, color = metric)) +
   )
 ```
 
-From 2000 to 2024, fouls per match show an overall decreasing trend, especially from 2000 to 2013, followed by a more stable pattern in recent years. This behavior can be attributed to improved playing techniques and stricter strategies from referees. When examining yellow cards over the same period, we observe a consistent trend from 2000 to 2020. This suggests that, even though fouls decreased, referees continued issuing yellow cards at similar rates, which is evidence of a stricter interpretation of the rules. This aligns with the fact that the regulations have become stronger and penalize more unsporting conduct. Red cards, meanwhile, have historically been rare events in matches. Although they appear to decrease slightly, they remain at consistently low levels.
+From 2000 to 2024, fouls per match show an overall decreasing trend, especially from 2000 to 2013, followed by a more stable pattern in recent years. This behavior can be attributed to improved playing techniques and stricter enforcement of strategies by referees. When examining yellow cards over the same period, we observe a consistent increasing trend, more pronounced in the last years. This suggests that, even though fouls decreased, referees continued issuing yellow cards at similar rates, which is evidence of a stricter interpretation of the rules. This aligns with the fact that the regulations have become stronger and penalize more unsporting conduct. Red cards, meanwhile, have historically been rare events in matches. Although they appear to decrease slightly, they remain at consistently low levels.
 
 ::: {.callout-note collapse="true"}
 
