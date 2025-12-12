@@ -2,7 +2,7 @@
 
 ## Home Advantage
 
-We want to see how soccer has changed through the years in terms of attack and defense. Our hypothesis is that the english football has become more competitive. For proving this hypothesis we will analyze the differences among the teams that conform the Premier League and the lower tiers, the dominance and the results of the matches.
+We want to see how football has changed through the years in terms of attack and defense. Our hypothesis is that the english football has become more competitive. For proving this hypothesis we will analyze the differences among the teams that conform the Premier League and the lower tiers, the dominance and the results of the matches.
 
 First of all, we know that goals can be a strong indicator to understand this, so we plan to base our first analysis on the average number of goals scored by teams.
 
@@ -145,6 +145,11 @@ results_yearly |>
 Over the past three decades, Premier League results show a decrease in draws, an increase in away-team victories, and relatively stable home-team victories. This suggests that the league has become more competitive and that the traditional home-field advantage has gradually diminished.
 
 
+::: {.callout-note collapse="true"}
+## Results on football
+
+Football is a low scoring sport. The most frequent results are 0-0, 1-0 and 1-1.
+:::
 
 ## Seasonal trends
 
@@ -170,7 +175,7 @@ ggplot(goals_monthly, aes(x = Month, y = AvgGoals, group = Season, color = Seaso
 ```
 
 
-The traditional europan schedule for a seasons spans from August to May of the next year. In this time-series analysis we evaluated the "End of Season Madness" hypothesis—the theory that goalscoring rates increase significantly in the final months of the campaign due to high stakes (title chases/relegation battles) or fatigue. 
+The traditional europan schedule for a seasons spans from August to May of the next year. In this time-series analysis we evaluated the "End of Season Madness" hypothesis, the theory that goalscoring rates increase significantly in the final months of the campaign due to high stakes (title chases/relegation battles) or fatigue. 
 
 The 2019/2020 season (blue line) illustrates the unique impact of the COVID-19 pandemic schedule. It is the only season with data extending into June and July, where scoring rates remained high (~3.0 goals), suggesting that the break in play did not negatively impact attacking output.
 
@@ -235,7 +240,12 @@ ggplot(alluvial_df, aes(x = Matchday, stratum  = PosFactor, alluvium = Team, y= 
 
 The Premier League is considered an extremely competitive league due to its more equitable distribution of broadcasting revenue, the quality of signings, and the high athletic level of the players. Nevertheless, if we look at last season´s table, we can identify three types of teams: those that fight for the top positions, those that remain in the middle of the table, and those that struggle to avoid finishing last. The first ten matches of the 2024/2025 season were not definite to predict how the teams would end the season were not enough to predict how the teams would finish; after the tenth match, the die was pretty much cast, and the battle unfolded within each of these three groups.
 
+::: {.callout-note collapse="true"}
 
+## Champions
+
+The champion of a season is the team with most points. A victory grants 3 points, a draw grants 1 point and a loss grants 0 points. Liverpool and Manchester City are the two teams with most titles in the top tier with 20 titles. Liverpool had a drougth from the season 1989/1990 to the season 2019/2020.
+:::
 ## Team performance by league over the years
 
 ```{r fig.height=9, fig.width=7}
@@ -304,8 +314,7 @@ Data_Teams_Enhanced |>
 
 ```
 
-Premier League is the highest tier in the English Football system, in our sample we have 32 complete seasons. Manchester United is the team with more titles, followed up by Mancester City... 
-
+This bar chart shows total Premier League seasons (1995-2025) for each team, with yellow segments indicating titles won and colors distinguishing current Premier League teams (darker blue) from those in lower tiers (lighter blue). In our sample, Man United leads with 12 titles across 30 seasons, followed by Man City (8), Chelsea (5), Arsenal (3), and Liverpool (2), while Leicester and Blackburn each won once. The "Big Six" (Tottenham, Man United, Liverpool, Everton, Chelsea, Arsenal) have maintained near-constant Premier League presence, while many clubs like Leeds, Nottingham Forest, and Sheffield United have spent significant periods in lower divisions, illustrating the difficulty of sustaining top-flight status outside the elite group.
 
 ```{r}
 
@@ -424,10 +433,16 @@ When we analyze the teams in the current season and compare their historical pos
 
 This is a positive sign the league's competitiveness as it indicates that newly promoted teams can enter the Premier League and compete with the top clubs.
 
+
+::: {.callout-note collapse="true"}
+
+## Promotion and Relegation
+
+Each season the bottom 3 teams are relegated to the Championship (second tier), while 3 teams of the Championship are promoted to the Premier League, the two top-finishing teams are automatically promoted to the Premier League. The teams that finish the season in third to sixth place enter a play-off tournament, with the winner also gaining promotion to the Premier League.
+:::
 ## The English Football System
 
 ### Locations
-We have 116 teams across all the tiers, we can see that London and
 
 ```{r fig.width=12, fig.height=12}
 {
@@ -621,6 +636,14 @@ ggplot() +
 ```
 Here we displays the locations of football stadiums for all clubs across the top four tiers of English football, while the highlighted labels identify only the teams competing in the most recent Premier League season. The regions are shaded by how many clubs (tiers 1–4) they contain, revealing clear geographic patterns: the North West emerges as the strongest football hub, with the highest concentration of clubs and multiple Premier League sides such as Manchester United, Manchester City, Liverpool, and Everton. Greater London also shows a dense cluster of stadiums and several Premier League teams—Arsenal, Chelsea, Tottenham, West Ham, Crystal Palace, Fulham, and Brentford—reflecting the capital’s deep football footprint. Regions like Yorkshire and the Humber, the Midlands, and the South Coast host fewer top-flight teams but remain important centers of the broader football pyramid. In contrast, areas such as the South West and East Wales contain very few professional clubs. Overall, the map illustrates both the widespread presence of football across England and the regional clustering of elite Premier League teams in major urban and historically industrial areas.
 
+
+
+::: {.callout-note collapse="true"}
+
+## Teams
+We have 116 different teams in our sample!
+:::
+
 ### Tier dynamics
 
 ```{r fig.height=12}
@@ -686,6 +709,7 @@ ggplot(teams_timeline, aes(x = substr(Season,6,9), y = Tier, group = Team)) +
   geom_line(color = "steelblue", linewidth = 1.2) +
   geom_point(color = "#191970", size = 2) +
   scale_y_discrete(limits=rev) +
+  scale_x_discrete(breaks = c("1995", "2000", "2005","2010","2015", "2020","2025"))+
   facet_wrap(~ Team, ncol = 3) +  # 4 columns, 5 rows for 17 teams
   labs(
     title = "Team Performance Timelines (1994-2024)",
@@ -906,8 +930,8 @@ pca_result <- PCA(pca_data, graph = FALSE)
 
 fviz_pca_biplot(pca_result, 
                 repel = TRUE,
-                col.var = "red",
-                col.ind = "blue",
+                col.var = "darkred",
+                col.ind = "#191970",
                 alpha.ind = 0.7,
                 title = "Team Performance Biplot - All Variables")
 
@@ -972,7 +996,7 @@ ggplot(df_big6_prop, aes(x = Month, y = prop, color = Team_Result, group = Team_
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
 ```
-
+This graph displays the monthly proportion of wins, draws, and losses for England's Big 6 teams from 1995 to 2025, revealing a clear performance hierarchy. Man City and Liverpool dominate with consistently high win rates (50-65%), while Man United shows periods of exceptional performance with win rates approaching 70%, likely reflecting their success in the earlier years of this period. Arsenal and Chelsea maintain steady mid-tier performance with win rates around 50-60%. Tottenham shows the most concerning trend, with their win rate (blue) declining and loss rate (green) increasing significantly, particularly toward the end of the season where losses nearly match wins by May. Draw rates remain relatively stable across all teams at 20-30%, and while there's some month-to-month variation, no dramatic seasonal patterns emerge, suggesting these proportions reflect overall team quality rather than specific calendar effects.
 
 ## Referee analysys, is there bias?
 
@@ -1027,36 +1051,42 @@ Referees |>
   mutate(Referee = fct_reorder(Referee, Count_matches)) |>
   ggplot(aes(x = Referee, y = Count_matches)) +
   geom_segment(aes(xend = Referee, yend = 0), color = "grey70") +
-  geom_point(size = 3, color = "#191970") +
+  geom_point(size = 3, color = "#191970", aes(shape=as.character(n_tiers))) +
   coord_flip() +
   labs(
     title = "Top Referees by Match Count",
     x = "Referee",
-    y = "Matches"
+    y = "Matches",
+    shape="Number of tiers"
   ) +
-  theme_football()
+  theme_football()+
+  theme(legend.position="bottom")
 
 ```
-First we started to 
+This graph ranks the top Premier League referees by total matches officiated between 1995 and 2025, with Mike Dean leading at approximately 650 matches, followed by Kevin Stroud and Martin Atkinson around 600 matches. The symbols distinguish referees who worked through 3 tiers (circles) versus 4 tiers (triangles) of English football before reaching the Premier League, showing a fairly even mix of both pathways among the most experienced officials. Most top referees cluster between 400-650 matches, representing typical career lengths at the Premier League level over this 30-year period, with no clear correlation between the number of lower divisions worked and ultimate longevity in the top flight.
+
 ```{r}
 
 Referees |>
   mutate(
     home_win_rate = Home_wins_count / Count_matches
   ) |>
-  ggplot(aes(x = Count_matches, y = home_win_rate)) +
-  geom_point(alpha = 0.3, color = "#191970") +
+  ggplot(aes(x = Count_matches, y = home_win_rate,color=as.character(n_tiers))) +
+  geom_point(alpha = 0.7) +
   scale_y_log10()+
   scale_x_log10()+
   labs(
     title = "Do More Experienced Referees Show Less Home Bias?",
     x = "Matches ",
-    y = "Home Win Rate"
-  ) + theme_football()
+    y = "Home Win Rate",
+    color="Number of tiers"
+  ) + theme_football()+
+    theme(legend.position="bottom")
 
 ```
-Explain
 
+
+The data shows a clear downward trend: less experienced referees (under 100 matches) display more scattered and often higher home win rates (ranging from 0.3 to 0.7), while more experienced referees (300+ matches) cluster around a narrower, lower range of approximately 0.35-0.45. This pattern suggests that experienced referees do indeed show reduced home bias, with their decisions converging toward more consistent outcomes regardless of venue. The color coding reveals no obvious pattern between the number of tiers worked and home bias, indicating that total experience rather than career pathway is the key factor in minimizing home advantage effects.
 ```{r}
 Referees_Home_team=Data_England_Referee |>
   filter(!Referee=="Unknown")|>
@@ -1095,7 +1125,7 @@ ggplot(significant_ref_team, aes(x = Referee, y = HomeTeam)) +
     subtitle = "Heatmap showing if referees favor certain home teams",
     x = "Referee",
     y = "Home Team",
-    caption = "Only included home team-referee combiantions with at least 20 games"
+    caption = "Only included home team-referee combiantions with at least 25 games"
   ) + theme_football()+
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
@@ -1104,13 +1134,15 @@ ggplot(significant_ref_team, aes(x = Referee, y = HomeTeam)) +
   )
 ```
 
+This heatmap shows home team win rates for specific referee-team combinations (minimum 25 matches), with red indicating higher win rates and blue indicating lower rates. Arsenal displays consistently high home win rates across all referees, while Man City performs particularly well under M Oliver. Top teams like Arsenal, Man City, and Liverpool generally show stronger home performance (more red) across most referees, likely reflecting their overall quality rather than referee bias, while teams like Tottenham, Everton, and Rochdale show more blue shading, indicating lower home win rates that suggest either weaker home form or more neutral officiating during these matches.
+
 ```{r}
 Referees_Away_team=Data_England_Referee |>
   filter(!Referee=="Unknown")|>
   mutate(HomeWon=ifelse(FTR=="H",1,0),
          AwayWon=ifelse(FTR=="A",1,0))|>
   group_by(
-    Referee, HomeTeam
+    Referee, AwayTeam
   ) |>
   summarise(Count_matches=n(),
             n_seasons=n_distinct(Season,na.rm=T),
@@ -1129,7 +1161,7 @@ Referees_Away_team <- Referees_Away_team |>
 significant_ref_team_away <- Referees_Away_team |>
   filter(Total_matches >= 25)  
 
-ggplot(significant_ref_team_away, aes(x = Referee, y = HomeTeam)) +
+ggplot(significant_ref_team_away, aes(x = Referee, y = AwayTeam)) +
   geom_tile(aes(fill = Home_win_rate), color = "white") +
   scale_fill_gradient2(
     low = "#191970", mid = "white", high = "darkred", 
@@ -1142,7 +1174,7 @@ ggplot(significant_ref_team_away, aes(x = Referee, y = HomeTeam)) +
     subtitle = "Heatmap showing if referees favor certain away teams",
     x = "Referee",
     y = "Away Team",
-    caption = "Only included away team-referee combiantions with at least 20 games"
+    caption = "Only included away team-referee combiantions with at least 25 games"
   ) + theme_football()+
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
@@ -1151,7 +1183,7 @@ ggplot(significant_ref_team_away, aes(x = Referee, y = HomeTeam)) +
   )
 
 ```
-
+The predominantly blue coloring reflects the inherent difficulty of winning away matches in football, with most combinations showing low away win rates. Chelsea stands out with notably higher away success under M Halsey (red shading), while Sunderland shows relatively stronger away performance under P Dowd. The overall pattern confirms that away wins remain rare across most referee-team combinations, with only occasional red cells indicating exceptions where top teams managed to overcome the typical away disadvantage.
 ## Fair play
 
 
@@ -1214,6 +1246,13 @@ ggplot(cards_fouls_long, aes(x = Year, y = value, color = metric)) +
 ```
 
 From 2000 to 2024, fouls per match show an overall decreasing trend, especially from 2000 to 2013, followed by a more stable pattern in recent years. This behavior can be related to better playing techniques and to a stricter strategies from referees. When looking at yellow cards over the same period, we observe a constant trend from 2000 to 2020. This suggests that, even though fouls decreased, referees continued issuing yellow cards at similar rates, which is evidence of a stricter interpretation of the rules. This aligns with the fact that the regulations have become stronger and penalize more unsporting conducts. Red cards, meanwhile, have historically been rare events in matches. Although they appear to decrease slightly, they remain at consistently low levels.
+
+::: {.callout-note collapse="true"}
+
+## Cards
+
+A yellow card is a formal caution for minor misconduct like dissent, time-wasting, or unsporting behavior, while a red card is a dismissal from the game for serious offenses (e.g., violent conduct, denying a goal-scoring opportunity) or receiving a second yellow card in the same match, forcing the player's team to play with one less player. 
+:::
 
 ```{r,warning=FALSE,message=FALSE}
 
